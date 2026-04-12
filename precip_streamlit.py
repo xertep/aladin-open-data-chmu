@@ -35,24 +35,34 @@ if st.button("Load data"):
 
     ds = xr.open_dataset(path, engine="cfgrib")
 
-    st.write(ds)
+    st.write("Dataset loaded")
+    st.write("Variables:", list(ds.data_vars))
 
     # ---- GET PRECIP ----
-    tp = ds[list(ds.data_vars)[0]]  # safer than guessing name
+    tp = ds[list(ds.data_vars)[0]]
 
-    # ---- COMPUTE 3h PRECIP ----
+    # compute 3-hour precipitation
     rain_3h = tp.diff(dim="step", n=3)
-    rain_3h = rain_3h.pad(step=(3, 0))
+
+    # keep only every 3rd step (aligned intervals)
+    rain_3h = rain_3h.isel(step=slice(3, None, 3))
+
+    # remove negatives
     rain_3h = rain_3h.clip(min=0)
 
     # ---- SELECT STEP ----
-    step_idx = st.slider("Forecast step", 0, len(rain_3h.step)-1, 10)
+    step_idx = st.slider("3h interval", 0, len(rain_3h.step)-1, 0)
+
+    valid_time = data.valid_time.values
+    st.write(f"Interval ending at: {valid_time}")
 
     data = rain_3h.isel(step=step_idx)
 
+    data_small = data[::4, ::4]
+
     # ---- PLOT ----
     fig, ax = plt.subplots(figsize=(6, 5))
-    data.plot(ax=ax)
-    ax.set_title(f"3h precipitation (step {step_idx})")
+    data_small.plot(ax=ax)
+    ax.set_title("3-hour precipitation")
 
     st.pyplot(fig)
