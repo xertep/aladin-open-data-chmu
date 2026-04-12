@@ -70,7 +70,7 @@ if "path" in st.session_state:
 
         # ---- MAP PLOT ----
         fig = plt.figure(figsize=(14, 6))
-        ax = plt.axes(projection=ccrs.Mercator())
+        ax = plt.axes(projection=ccrs.LambertConformal())
 
         # set extent (CZ)
         ax.set_extent([12, 19, 48.3, 51.2])
