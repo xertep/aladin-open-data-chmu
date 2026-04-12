@@ -33,24 +33,26 @@ def load_data(url):
 
 # 1. Define the boundaries (the numbers on the left of your image)
 # These are the 'edges' of the color blocks
-boundaries = [0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 6.0, 10.0, 15.0, 20.0, 30.0, 40.0, 80.0, 100.0]
+boundaries = [0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 6.0, 10.0, 15.0, 20.0, 30.0, 40.0, 60.0, 80.0, 100.0, 150.0]
 
 # 2. Define the colors corresponding to each boundary
 # I have mapped these based on your image (Purple -> Blue -> Green -> Yellow -> Orange -> Red -> White)
 colors = [
-    "#4B0082", # Deep Purple (0.1 - 0.3)
-    "#0000FF", # Blue (0.3 - 0.5)
-    "#00008B", # Dark Blue (0.5 - 1.0)
-    "#00FF00", # Green (1.0 - 2.0)
-    "#32CD32", # Lime Green (2.0 - 4.0)
-    "#ADFF2F", # Green Yellow (4.0 - 6.0)
-    "#FFFF00", # Yellow (6.0 - 10.0)
-    "#FFA500", # Orange (10.0 - 20.0)
-    "#FF8C00", # Dark Orange (20.0 - 30.0)
-    "#FF4500", # Orange Red (30.0 - 40.0)
-    "#B22222", # Firebrick (40.0 - 80.0)
-    "#8B0000", # Dark Red (80.0 - 100.0)
-    "#FFFFFF", # White (100.0 - 150.0)
+    "#390071", # Deep Purple (0.1 - 0.3)
+    "#3000aa", # Blue (0.3 - 0.5)
+    "#0000ff", # Dark Blue (0.5 - 1.0)
+    "#006dc2", # Green (1.0 - 2.0)
+    "#00a200", # Lime Green (2.0 - 4.0)
+    "#00be00", # Green Yellow (4.0 - 6.0)
+    "#35db00", # Yellow (6.0 - 10.0)
+    "#9edf00", # Orange (10.0 - 15.0)
+    "#e3df00", # Dark Orange (15.0 - 20.0)
+    "#ffb200", # Orange Red (20.0 - 30.0)
+    "#ff8600", # Firebrick (30.0 - 40.0)
+    "#ff5900", # Dark Red (40.0 - 60.0)
+    "#ff0000", # White (60.0 - 80.0)
+    "#a20000", # White (80.0 - 100.0)
+    "#ffffff", # White (100.0 - 150.0)
     "#960096"  # Dark Pink (> 150.0)
 ]
 
