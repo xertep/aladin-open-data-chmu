@@ -4,3 +4,4 @@ cfgrib
 matplotlib
 requests
 numpy
+cartopy

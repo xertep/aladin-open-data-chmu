@@ -14,7 +14,7 @@ run = st.selectbox("Model run (UTC)", ["00", "06", "12", "18"])
 
 url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFPREC_TOTAL.grb.bz2"
 
-st.write("Data URL:", url)
+# st.write("Data URL:", url)
 
 # ---- LOAD DATA ----
 @st.cache_data(show_spinner=True)
@@ -42,8 +42,11 @@ if "path" in st.session_state:
 
     ds = open_grib(path)
 
+    import pandas as pd
+    import cartopy.crs as ccrs
+    import cartopy.feature as cfeature
+
     st.write("Dataset loaded")
-    #st.write("Variables:", list(ds.data_vars))
 
     tp = ds[list(ds.data_vars)[0]]
 
@@ -51,20 +54,34 @@ if "path" in st.session_state:
     rain_3h = rain_3h.isel(step=slice(3, None, 3))
     rain_3h = rain_3h.clip(min=0)
 
-    step_idx = st.slider("3h interval", 0, len(rain_3h.step)-1, 0)
+    # LOOP THROUGH ALL TIME STEPS
+    for i in range(len(rain_3h.step)):
+        data = rain_3h.isel(step=i)
 
-    data = rain_3h.isel(step=step_idx)
+        end_time = pd.to_datetime(data.valid_time.values)
+        start_time = end_time - pd.Timedelta(hours=3)
 
-    import pandas as pd
-    end_time = pd.to_datetime(data.valid_time.values)
-    start_time = end_time - pd.Timedelta(hours=3)
+        st.markdown(f"### {start_time:%H:%M} – {end_time:%H:%M} UTC")
 
-    st.write(f"{start_time:%H:%M} – {end_time:%H:%M} UTC")
+        data_small = data[::4, ::4]
 
-    data_small = data[::4, ::4]
+        # ---- MAP PLOT ----
+        fig = plt.figure(figsize=(6, 5))
+        ax = plt.axes(projection=ccrs.PlateCarree())
 
-    fig, ax = plt.subplots(figsize=(6, 5))
-    data_small.plot(ax=ax)
-    ax.set_title("3-hour precipitation")
+        # precipitation
+        data_small.plot(
+            ax=ax,
+            transform=ccrs.PlateCarree(),
+            cmap="Blues",
+            add_colorbar=False
+        )
 
-    st.pyplot(fig)
+        # country borders (magenta!)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+        # remove axes
+        ax.set_axis_off()
+
+        st.pyplot(fig)
