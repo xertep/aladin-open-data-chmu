@@ -33,13 +33,17 @@ def load_data(url):
 if st.button("Load data"):
     st.session_state["path"] = load_data(url)
 
+@st.cache_data
+def open_grib(path):
+    return xr.open_dataset(path, engine="cfgrib")
+
 if "path" in st.session_state:
     path = st.session_state["path"]
 
-    ds = xr.open_dataset(path, engine="cfgrib")
+    ds = open_grib(path)
 
     st.write("Dataset loaded")
-    st.write("Variables:", list(ds.data_vars))
+    #st.write("Variables:", list(ds.data_vars))
 
     tp = ds[list(ds.data_vars)[0]]
 
