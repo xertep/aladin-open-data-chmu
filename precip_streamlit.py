@@ -71,18 +71,14 @@ if "path" in st.session_state:
         end_time = all_times[idx]
         start_time = end_time - pd.Timedelta(hours=3)
 
-        # find matching index for start_time
-        start_idx = np.where(all_times == start_time)[0][0]
+        start_idx = np.argmin(np.abs(all_times - start_time))
 
-        # compute 3h precipitation
         data = tp.isel(step=idx) - tp.isel(step=start_idx)
 
-        # remove noise
         data = data.clip(min=0)
         data = data.where(data >= 0.1)
 
         st.markdown(f"### {start_time:%d %H:%M} – {end_time:%H:%M} UTC")
-
         data_small = data[::2, ::2]
 
         # ---- MAP ----
