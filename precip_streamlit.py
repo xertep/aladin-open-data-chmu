@@ -5,6 +5,7 @@ import xarray as xr
 import matplotlib.pyplot as plt
 import tempfile
 import numpy as np
+import matplotlib.colors as mcolors
 
 st.title("CHMI ALADIN 3h Precipitation 🌧️")
 
@@ -29,6 +30,34 @@ def load_data(url):
     with tempfile.NamedTemporaryFile(suffix=".grb", delete=False) as f:
         f.write(grib_bytes)
         return f.name
+
+# 1. Define the boundaries (the numbers on the left of your image)
+# These are the 'edges' of the color blocks
+boundaries = [0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 6.0, 10.0, 15.0, 20.0, 30.0, 40.0, 80.0, 100.0]
+
+# 2. Define the colors corresponding to each boundary
+# I have mapped these based on your image (Purple -> Blue -> Green -> Yellow -> Orange -> Red -> White)
+colors = [
+    "#4B0082", # Deep Purple (0.1 - 0.3)
+    "#0000FF", # Blue (0.3 - 0.5)
+    "#00008B", # Dark Blue (0.5 - 1.0)
+    "#00FF00", # Green (1.0 - 2.0)
+    "#32CD32", # Lime Green (2.0 - 4.0)
+    "#ADFF2F", # Green Yellow (4.0 - 6.0)
+    "#FFFF00", # Yellow (6.0 - 10.0)
+    "#FFA500", # Orange (10.0 - 20.0)
+    "#FF8C00", # Dark Orange (20.0 - 30.0)
+    "#FF4500", # Orange Red (30.0 - 40.0)
+    "#B22222", # Firebrick (40.0 - 80.0)
+    "#8B0000", # Dark Red (80.0 - 100.0)
+    "#FFFFFF", # White (100.0 - 150.0)
+    "#960096"  # Dark Pink (> 150.0)
+]
+
+# 3. Create the Colormap and the Normalization object
+custom_cmap = mcolors.ListedColormap(colors)
+norm = mcolors.BoundaryNorm(boundaries, custom_cmap.N)
+    
 
 if st.button("Load data"):
     st.session_state["path"] = load_data(url)
@@ -90,12 +119,15 @@ if "path" in st.session_state:
         data_small.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
-            cmap="turbo",
-            vmin=0,
-            vmax=10,
+            cmap=custom_cmap,       # Use our new cmap
+            norm=norm,              # Use the boundary norm instead of vmin/vmax
             add_colorbar=True,
             add_labels=False,
-            cbar_kwargs={"label": "Precipitation (mm / 3h)"}
+            cbar_kwargs={
+                "label": "Precipitation (mm / 3h)",
+                "boundaries": boundaries, # This makes the colorbar show the steps correctly
+                "ticks": [0.1, 0.5, 1, 2, 4, 6, 10, 20, 40, 80, 100] # Specific labels for the bar
+            }
         )
 
         ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
