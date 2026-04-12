@@ -1,0 +1,7 @@
+streamlit
+requests
+bz2
+xarray
+matplotlib.pyplot
+tempfile
+numpy
