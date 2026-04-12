@@ -61,7 +61,7 @@ if "path" in st.session_state:
     for i in range(len(rain_3h.step)):
         data = rain_3h.isel(step=i)
         # filter noise
-        data = data.where(data >= 0.01)
+        data = data.where(data >= 0.1)
 
         start_time = run_time + pd.Timedelta(hours=3 * i)
         end_time = start_time + pd.Timedelta(hours=3)
