@@ -128,7 +128,7 @@ if "path" in st.session_state:
             cbar_kwargs={
                 "label": "Precipitation (mm / 3h)",
                 "boundaries": boundaries, # This makes the colorbar show the steps correctly
-                "ticks": [0.1, 0.5, 1, 2, 4, 6, 10, 20, 40, 80, 100] # Specific labels for the bar
+                "ticks": [0.1, 0.3, 0.5, 1, 2, 4, 6, 10, 15, 20, 30, 40, 60, 80, 100, 150] # Specific labels for the bar
             }
         )
 
