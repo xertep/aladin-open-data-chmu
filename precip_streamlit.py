@@ -42,53 +42,64 @@ if "path" in st.session_state:
 
     ds = open_grib(path)
 
-    import pandas as pd
-    import cartopy.crs as ccrs
-    import cartopy.feature as cfeature
-
     st.write("Dataset loaded")
 
     tp = ds[list(ds.data_vars)[0]]
 
-    step = tp.step.values  # forecast steps
+    import pandas as pd
+    import cartopy.crs as ccrs
+    import cartopy.feature as cfeature
 
-    rain_3h = tp.diff(dim="step", n=3).shift(step=-1)
-    rain_3h = rain_3h.isel(step=slice(2, None, 3))
-    rain_3h = rain_3h.clip(min=0)
+    # All valid times
+    all_times = pd.to_datetime(tp.valid_time.values)
 
+    # Model run time
     run_time = pd.to_datetime(ds.time.values)
 
-    st.write("run_time raw:", ds.time.values)
-    st.write("valid_time sample:", tp.valid_time.values[:5])
+    # ---- FIND 3H WINDOWS ----
+    target_indices = []
 
-    for i in range(len(rain_3h.step)):
-        data = rain_3h.isel(step=i)
-        # filter noise
-        data = data.where(data >= 0.1)
+    for i, t in enumerate(all_times):
+        diff_hours = (t - run_time).total_seconds() / 3600
 
-        end_time = pd.to_datetime(data.valid_time.values)
+        # keep only 3h steps (3, 6, 9, ...)
+        if diff_hours > 0 and diff_hours % 3 == 0:
+            target_indices.append(i)
+
+    # ---- LOOP THROUGH WINDOWS ----
+    for idx in target_indices:
+        end_time = all_times[idx]
         start_time = end_time - pd.Timedelta(hours=3)
+
+        # find matching index for start_time
+        start_idx = np.where(all_times == start_time)[0][0]
+
+        # compute 3h precipitation
+        data = tp.isel(step=idx) - tp.isel(step=start_idx)
+
+        # remove noise
+        data = data.clip(min=0)
+        data = data.where(data >= 0.1)
 
         st.markdown(f"### {start_time:%d %H:%M} – {end_time:%H:%M} UTC")
 
         data_small = data[::2, ::2]
 
-        # ---- MAP PLOT ----
-        fig = plt.figure(figsize=(14, 6))
+        # ---- MAP ----
+        fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
 
-        # set extent (CZ)
-        ax.set_extent([12, 19, 48.3, 51.2])
-
+        ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
         data_small.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
-            cmap="turbo",
+            cmap="Blues",
             vmin=0,
             vmax=10,
             add_colorbar=True,
-            add_labels=False
+            add_labels=False,
+            cbar_kwargs={"label": "Precipitation (mm / 3h)"}
         )
 
         ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
