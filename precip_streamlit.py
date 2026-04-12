@@ -73,7 +73,7 @@ if "path" in st.session_state:
         ax = plt.axes(projection=ccrs.PlateCarree())
 
         # focus on CZ
-        ax.set_extent([19, 19, 48.5, 51.5])
+        ax.set_extent([11, 11, 48.5, 51.5])
 
         data_small.plot(
             ax=ax,
