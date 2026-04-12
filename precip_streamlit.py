@@ -53,10 +53,9 @@ if st.button("Load data"):
     # ---- SELECT STEP ----
     step_idx = st.slider("3h interval", 0, len(rain_3h.step)-1, 0)
 
+    data = rain_3h.isel(step=step_idx)
     valid_time = data.valid_time.values
     st.write(f"Interval ending at: {valid_time}")
-
-    data = rain_3h.isel(step=step_idx)
 
     data_small = data[::4, ::4]
 
