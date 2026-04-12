@@ -59,14 +59,14 @@ if "path" in st.session_state:
         data = rain_3h.isel(step=i)
 
         # filter noise
-        data = data.where(data >= 0.1)
+        data = data.where(data >= 0.01)
 
         end_time = pd.to_datetime(data.valid_time.values)
         start_time = end_time - pd.Timedelta(hours=3)
 
         st.markdown(f"### {start_time:%H:%M} – {end_time:%H:%M} UTC")
 
-        data_small = data[::4, ::4]
+        data_small = data[::2, ::2]
 
         # ---- MAP PLOT ----
         fig = plt.figure(figsize=(14, 6))
