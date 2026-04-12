@@ -90,7 +90,7 @@ if "path" in st.session_state:
         data_small.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
-            cmap="Blues",
+            cmap="turbo",
             vmin=0,
             vmax=10,
             add_colorbar=True,
