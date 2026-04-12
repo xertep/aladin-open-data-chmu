@@ -51,14 +51,10 @@ if "path" in st.session_state:
     tp = ds[list(ds.data_vars)[0]]
 
     rain_3h = tp.diff(dim="step", n=3)
-    rain_3h = rain_3h.isel(step=slice(3, None, 3))
-    rain_3h = rain_3h.clip(min=0)
 
-    # LOOP THROUGH ALL TIME STEPS
-    for i in range(len(rain_3h.step)):
+    for i in range(rain_3h.sizes["step"]):
         data = rain_3h.isel(step=i)
 
-        # filter noise
         data = data.where(data >= 0.01)
 
         end_time = pd.to_datetime(data.valid_time.values)
