@@ -52,7 +52,7 @@ if "path" in st.session_state:
 
     step = tp.step.values  # forecast steps
 
-    rain_3h = tp.diff(dim="step", n=3)
+    rain_3h = tp.diff(dim="step", n=3).shift(step=-1)
     rain_3h = rain_3h.isel(step=slice(2, None, 3))
     rain_3h = rain_3h.clip(min=0)
 
