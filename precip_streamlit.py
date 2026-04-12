@@ -58,6 +58,9 @@ if "path" in st.session_state:
     for i in range(len(rain_3h.step)):
         data = rain_3h.isel(step=i)
 
+        # filter noise
+        data = data.where(data >= 0.1)
+
         end_time = pd.to_datetime(data.valid_time.values)
         start_time = end_time - pd.Timedelta(hours=3)
 
@@ -66,22 +69,23 @@ if "path" in st.session_state:
         data_small = data[::4, ::4]
 
         # ---- MAP PLOT ----
-        fig = plt.figure(figsize=(6, 5))
+        fig = plt.figure(figsize=(6, 8))
         ax = plt.axes(projection=ccrs.PlateCarree())
 
-        # precipitation
+        # focus on CZ
+        ax.set_extent([11, 19, 48.5, 51.5])
+
         data_small.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
             cmap="Blues",
-            add_colorbar=False
+            add_colorbar=False,
+            add_labels=False
         )
 
-        # country borders (magenta!)
         ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
         ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
 
-        # remove axes
         ax.set_axis_off()
 
-        st.pyplot(fig)
+        st.pyplot(fig, use_container_width=False)
