@@ -10,8 +10,7 @@ import matplotlib.ticker as ticker
 
 st.set_page_config(
     page_title="Aladin (open data ČHMÚ)",  # this changes the browser tab title
-    page_icon="🌧️",                     # optional: emoji or path to an image
-    layout="wide"                        # optional: wide layout for cards
+    page_icon="🌧️"                     # optional: emoji or path to an image
 )
 
 # ---- USER INPUT ----
