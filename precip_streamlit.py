@@ -69,11 +69,11 @@ if "path" in st.session_state:
         data_small = data[::4, ::4]
 
         # ---- MAP PLOT ----
-        fig = plt.figure(figsize=(6, 6))
+        fig = plt.figure(figsize=(8, 6))
         ax = plt.axes(projection=ccrs.PlateCarree())
 
         # set extent (CZ)
-        ax.set_extent([12, 19, 49.8, 50.2])
+        ax.set_extent([12, 19, 48.3, 51.2])
 
         # enforce correct proportions
         ax.set_aspect('equal', adjustable='datalim')
