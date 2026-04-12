@@ -85,6 +85,8 @@ if "path" in st.session_state:
             ax=ax,
             transform=ccrs.PlateCarree(),
             cmap="turbo",
+            vmin=0,
+            vmax=10,
             add_colorbar=True,
             add_labels=False
         )
