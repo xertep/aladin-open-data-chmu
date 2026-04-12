@@ -14,7 +14,7 @@ run = st.selectbox("Model run (UTC)", ["00", "06", "12", "18"])
 
 url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFPREC_TOTAL.grb.bz2"
 
-st.write("Data URL:", url)
+# st.write("Data URL:", url)
 
 # ---- LOAD DATA ----
 @st.cache_data(show_spinner=True)
@@ -31,37 +31,69 @@ def load_data(url):
         return f.name
 
 if st.button("Load data"):
-    path = load_data(url)
+    st.session_state["path"] = load_data(url)
 
-    ds = xr.open_dataset(path, engine="cfgrib")
+@st.cache_data
+def open_grib(path):
+    return xr.open_dataset(path, engine="cfgrib")
+
+if "path" in st.session_state:
+    path = st.session_state["path"]
+
+    ds = open_grib(path)
+
+    import pandas as pd
+    import cartopy.crs as ccrs
+    import cartopy.feature as cfeature
 
     st.write("Dataset loaded")
-    st.write("Variables:", list(ds.data_vars))
 
-    # ---- GET PRECIP ----
     tp = ds[list(ds.data_vars)[0]]
 
-    # compute 3-hour precipitation
-    rain_3h = tp.diff(dim="step", n=3)
+    step = tp.step.values  # forecast steps
 
-    # keep only every 3rd step (aligned intervals)
-    rain_3h = rain_3h.isel(step=slice(3, None, 3))
-
-    # remove negatives
+    rain_3h = tp.diff(dim="step", n=3).shift(step=-1)
+    rain_3h = rain_3h.isel(step=slice(2, None, 3))
     rain_3h = rain_3h.clip(min=0)
 
-    # ---- SELECT STEP ----
-    step_idx = st.slider("3h interval", 0, len(rain_3h.step)-1, 0)
+    run_time = pd.to_datetime(ds.time.values)
 
-    data = rain_3h.isel(step=step_idx)
-    valid_time = data.valid_time.values
-    st.write(f"Interval ending at: {valid_time}")
+    st.write("run_time raw:", ds.time.values)
+    st.write("valid_time sample:", tp.valid_time.values[:5])
 
-    data_small = data[::4, ::4]
+    for i in range(len(rain_3h.step)):
+        data = rain_3h.isel(step=i)
+        # filter noise
+        data = data.where(data >= 0.1)
 
-    # ---- PLOT ----
-    fig, ax = plt.subplots(figsize=(6, 5))
-    data_small.plot(ax=ax)
-    ax.set_title("3-hour precipitation")
+        end_time = pd.to_datetime(data.valid_time.values)
+        start_time = end_time - pd.Timedelta(hours=3)
 
-    st.pyplot(fig)
+        st.markdown(f"### {start_time:%d %H:%M} – {end_time:%H:%M} UTC")
+
+        data_small = data[::2, ::2]
+
+        # ---- MAP PLOT ----
+        fig = plt.figure(figsize=(14, 6))
+        ax = plt.axes(projection=ccrs.Mercator())
+
+        # set extent (CZ)
+        ax.set_extent([12, 19, 48.3, 51.2])
+
+
+        data_small.plot(
+            ax=ax,
+            transform=ccrs.PlateCarree(),
+            cmap="turbo",
+            vmin=0,
+            vmax=10,
+            add_colorbar=True,
+            add_labels=False
+        )
+
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+        ax.set_axis_off()
+
+        st.pyplot(fig, use_container_width=False)
