@@ -69,7 +69,7 @@ if "path" in st.session_state:
         data_small = data[::4, ::4]
 
         # ---- MAP PLOT ----
-        fig = plt.figure(figsize=(6, 8))
+        fig = plt.figure(figsize=(8, 8))
         ax = plt.axes(projection=ccrs.PlateCarree())
 
         # focus on CZ
@@ -78,7 +78,7 @@ if "path" in st.session_state:
         data_small.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
-            cmap="Blues",
+            cmap="turbo",
             add_colorbar=False,
             add_labels=False
         )
