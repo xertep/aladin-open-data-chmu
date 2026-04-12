@@ -73,7 +73,7 @@ if "path" in st.session_state:
         ax = plt.axes(projection=ccrs.PlateCarree())
 
         # set extent (CZ)
-        ax.set_extent([12, 19, 49.2, 50.8])
+        ax.set_extent([12, 19, 49.8, 50.2])
 
         # enforce correct proportions
         ax.set_aspect('equal', adjustable='datalim')
