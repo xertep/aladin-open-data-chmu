@@ -56,12 +56,12 @@ if "path" in st.session_state:
     rain_3h = rain_3h.isel(step=slice(3, None, 3))
     rain_3h = rain_3h.clip(min=0)
 
-    run_time = pd.to_datetime(ds.time.values[0])
+    run_time = pd.to_datetime(ds.time.values)
 
     for i in range(len(rain_3h.step)):
         data = rain_3h.isel(step=i)
 
-        start_time = run_time + pd.Timedelta(hours=3 * (i + 1))
+        start_time = run_time + pd.Timedelta(hours=3 * i)
         end_time = start_time + pd.Timedelta(hours=3)
 
         st.markdown(f"### {start_time:%d %H:%M} – {end_time:%H:%M} UTC")
