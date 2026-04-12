@@ -1,7 +1,6 @@
 streamlit
-requests
-bz2
 xarray
-matplotlib.pyplot
-tempfile
+cfgrib
+matplotlib
+requests
 numpy
