@@ -53,18 +53,21 @@ if "path" in st.session_state:
     step = tp.step.values  # forecast steps
 
     rain_3h = tp.diff(dim="step", n=3)
-    rain_3h = rain_3h.isel(step=slice(3, None, 3))
+    rain_3h = rain_3h.isel(step=slice(2, None, 3))
     rain_3h = rain_3h.clip(min=0)
 
     run_time = pd.to_datetime(ds.time.values)
+
+    st.write("run_time raw:", ds.time.values)
+    st.write("valid_time sample:", tp.valid_time.values[:5])
 
     for i in range(len(rain_3h.step)):
         data = rain_3h.isel(step=i)
         # filter noise
         data = data.where(data >= 0.1)
 
-        start_time = run_time + pd.Timedelta(hours=3 * i)
-        end_time = start_time + pd.Timedelta(hours=3)
+        end_time = pd.to_datetime(data.valid_time.values)
+        start_time = end_time - pd.Timedelta(hours=3)
 
         st.markdown(f"### {start_time:%d %H:%M} – {end_time:%H:%M} UTC")
 
@@ -82,7 +85,7 @@ if "path" in st.session_state:
             ax=ax,
             transform=ccrs.PlateCarree(),
             cmap="turbo",
-            add_colorbar=False,
+            add_colorbar=True,
             add_labels=False
         )
 
