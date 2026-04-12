@@ -6,12 +6,17 @@ import matplotlib.pyplot as plt
 import tempfile
 import numpy as np
 import matplotlib.colors as mcolors
+import matplotlib.ticker as ticker
 
-st.title("CHMI ALADIN 3h Precipitation 🌧️")
+st.set_page_config(
+    page_title="Aladin (open data ČHMÚ)",  # this changes the browser tab title
+    page_icon="🌧️",                     # optional: emoji or path to an image
+    layout="wide"                        # optional: wide layout for cards
+)
 
 # ---- USER INPUT ----
-date = st.text_input("Date (YYYYMMDD)", "20260412")
-run = st.selectbox("Model run (UTC)", ["00", "06", "12", "18"])
+date = st.text_input("Datum (YYYYMMDD)", "20260412")
+run = st.selectbox("Běh modelu (UTC)", ["00", "06", "12", "18"])
 
 url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFPREC_TOTAL.grb.bz2"
 
@@ -59,9 +64,18 @@ colors = [
 # 3. Create the Colormap and the Normalization object
 custom_cmap = mcolors.ListedColormap(colors)
 norm = mcolors.BoundaryNorm(boundaries, custom_cmap.N)
+
+# 1. Define a custom formatting function
+def weather_formatter(x, pos):
+    # If the value is less than 1, use 1 decimal place (e.g., 0.5)
+    if x < 1:
+        return f"{x:.1f}"
+    # If the value is 1 or greater, return it as an integer (e.g., 10)
+    else:
+        return f"{int(x)}"
     
 
-if st.button("Load data"):
+if st.button("Zobraz data"):
     st.session_state["path"] = load_data(url)
 
 @st.cache_data
@@ -73,7 +87,7 @@ if "path" in st.session_state:
 
     ds = open_grib(path)
 
-    st.write("Dataset loaded")
+    st.write("Data načtena")
 
     tp = ds[list(ds.data_vars)[0]]
 
@@ -126,9 +140,11 @@ if "path" in st.session_state:
             add_colorbar=True,
             add_labels=False,
             cbar_kwargs={
-                "label": "Precipitation (mm / 3h)",
-                "boundaries": boundaries, # This makes the colorbar show the steps correctly
-                "ticks": [0.1, 0.3, 0.5, 1, 2, 4, 6, 10, 15, 20, 30, 40, 60, 80, 100, 150] # Specific labels for the bar
+                "label": "Srážky (mm / 3h)",
+                "boundaries": boundaries,
+                "ticks": [0.1, 0.3, 0.5, 1, 2, 4, 6, 10, 15, 20, 30, 40, 60, 80, 100, 150],
+                # 2. Apply the custom formatter to the colorbar axis
+                "format": ticker.FuncFormatter(weather_formatter) 
             }
         )
 
