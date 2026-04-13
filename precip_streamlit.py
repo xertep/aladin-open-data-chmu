@@ -372,8 +372,6 @@ if layers["tminmax"] and "tmax_path" in st.session_state:
     del ds_tmin, tmin
 
 
-
-
 # ---- LOAD TMIN / TMAX ----
 if layers["wind"] and "wind_speed_path" in st.session_state:
     ds_ws = open_grib(st.session_state["wind_speed_path"])
@@ -387,7 +385,6 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
 
     gu = ds_gu[list(ds_gu.data_vars)[0]]
     gv = ds_gv[list(ds_gv.data_vars)[0]]
-
 
     all_times = pd.to_datetime(ws.valid_time.values)
     run_time = pd.to_datetime(ds_ws.time.values)
