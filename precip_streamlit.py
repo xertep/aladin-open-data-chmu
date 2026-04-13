@@ -7,6 +7,7 @@ import tempfile
 import numpy as np
 import matplotlib.colors as mcolors
 import matplotlib.ticker as ticker
+import matplotlib.patheffects as pe
 import pandas as pd
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -178,9 +179,8 @@ if layers["precip"] and "precip_path" in st.session_state:
 
         st.pyplot(fig, use_container_width=False)
 
+        ds.close()
         del ds, tp
-
-ds.close()
 
 
 
@@ -265,9 +265,9 @@ if layers["temp"] and "temp_path" in st.session_state:
 
         st.pyplot(fig)
 
-        del ds_temp, temp
+        ds_temp.close()
 
-ds_temp.close()
+        del ds_temp, temp
 
 
 # ---- LOAD TMIN / TMAX ----
@@ -342,11 +342,7 @@ if layers["tminmax"] and "tmax_path" in st.session_state:
                     va="center",
                     fontsize=8,
                     color="white",
-                    path_effects=[
-                        plt.matplotlib.patheffects.withStroke(
-                            linewidth=2, foreground="black"
-                        )
-                    ]
+                    path_effects=[pe.withStroke(linewidth=2, foreground="black")]
                 )
 
         ax.add_feature(cfeature.BORDERS, edgecolor="black", linewidth=1)
@@ -356,9 +352,10 @@ if layers["tminmax"] and "tmax_path" in st.session_state:
 
         st.pyplot(fig)
 
+        ds_tmax.close()
+        ds_tmin.close()
+
         del ds_tmax, tmax
         del ds_tmin, tmin
 
-ds_tmax.close()
-ds_tmin.close()
 
