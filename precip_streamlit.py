@@ -198,6 +198,7 @@ if layers["temp"] and "temp_path" in st.session_state:
         st.markdown(f"### {valid_time:%d %H:%M} UTC")
 
         data_small = data[::2, ::2]
+        label_data = data[::10, ::10]   # controls density (bigger = fewer labels)
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
@@ -216,6 +217,29 @@ if layers["temp"] and "temp_path" in st.session_state:
                 "label": "Teplota (°C)"
             }
         )
+
+        lats = label_data.latitude.values
+        lons = label_data.longitude.values
+        values = label_data.values
+
+        for i in range(len(lats)):
+            for j in range(len(lons)):
+                val = values[i, j]
+
+                if np.isnan(val):
+                    continue
+
+                ax.text(
+                    lons[j],
+                    lats[i],
+                    f"{int(val)}",   # no decimals
+                    transform=ccrs.PlateCarree(),
+                    ha="center",
+                    va="center",
+                    fontsize=8,
+                    color="black",
+                    alpha=0.7
+                )
 
         ax.add_feature(cfeature.BORDERS, edgecolor="black", linewidth=1)
         ax.add_feature(cfeature.COASTLINE, edgecolor="black", linewidth=1)
