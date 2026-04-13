@@ -215,7 +215,7 @@ if layers["temp"] and "temp_path" in st.session_state:
         st.markdown(f"### {valid_time:%d %H:%M} UTC")
 
         data_small = data[::2, ::2]
-        label_data = data[::10, ::10]   # controls density (bigger = fewer labels)
+        label_data = data[::15, ::15]   # controls density (bigger = fewer labels)
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
@@ -301,7 +301,7 @@ if layers["tminmax"] and "tmax_path" in st.session_state:
         st.markdown(f"### {title} – {valid_time:%d %H:%M} UTC")
 
         data_small = data[::2, ::2]
-        label_data = data[::10, ::10]
+        label_data = data[::15, ::15]
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
