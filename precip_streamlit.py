@@ -106,7 +106,7 @@ GUST_MAX = 30
 
 cloud_norm = mcolors.Normalize(vmin=0, vmax=100)
 
-cmap_total = "Greys"
+cmap_total = "Greys_r"
 
 cmap_low = mcolors.LinearSegmentedColormap.from_list(
     "low_clouds", ["black", "#ffff49"]
