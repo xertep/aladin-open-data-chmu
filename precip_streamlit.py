@@ -188,7 +188,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
         data = data.clip(min=0)
         data = data.where(data >= 0.1)
 
-        st.markdown(f"### {start_time:%d %H:%M} – {end_time:%H:%M} UTC")
+        st.markdown(f"### {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC")
         data_small = data[::2, ::2]
 
         # ---- MAP ----
@@ -253,7 +253,7 @@ if layer == "Teplota" and "temp_path" in st.session_state:
         # Kelvin -> Celsius
         data = temp.isel(step=idx) - 273.15
 
-        st.markdown(f"### {valid_time:%d %H:%M} UTC")
+        st.markdown(f"###Teplota - {t:%d.%m.%y %H:%M} UTC")
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]   # controls density (bigger = fewer labels)
@@ -299,8 +299,8 @@ if layer == "Teplota" and "temp_path" in st.session_state:
                     alpha=0.7
                 )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="black", linewidth=1)
-        ax.add_feature(cfeature.COASTLINE, edgecolor="black", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
 
         ax.set_axis_off()
 
@@ -339,7 +339,7 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
         else:
             continue
 
-        st.markdown(f"### {title} – {valid_time:%d %H:%M} UTC")
+        st.markdown(f"### {title} – {t:%d.%m.%y %H:%M} UTC")
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]
@@ -386,8 +386,8 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
                     alpha=0.7
                 )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="black", linewidth=1)
-        ax.add_feature(cfeature.COASTLINE, edgecolor="black", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
 
         ax.set_axis_off()
 
@@ -492,8 +492,8 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
         )
 
         # ---- MAP FEATURES ----
-        ax.add_feature(cfeature.BORDERS, edgecolor="black", linewidth=1)
-        ax.add_feature(cfeature.COASTLINE, edgecolor="black", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
 
         ax.set_axis_off()
 
