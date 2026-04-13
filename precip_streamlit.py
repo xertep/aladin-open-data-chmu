@@ -109,15 +109,15 @@ cloud_norm = mcolors.Normalize(vmin=0, vmax=100)
 cmap_total = "Greys"
 
 cmap_low = mcolors.LinearSegmentedColormap.from_list(
-    "low_clouds", ["#00000000", "#ffff49"]
+    "low_clouds", ["black", "#ffff49"]
 )
 
 cmap_mid = mcolors.LinearSegmentedColormap.from_list(
-    "mid_clouds", ["#00000000", "#b6ffb6"]
+    "mid_clouds", ["black", "#b6ffb6"]
 )
 
 cmap_high = mcolors.LinearSegmentedColormap.from_list(
-    "high_clouds", ["#00000000", "#b6b6ff"]
+    "high_clouds", ["black", "#b6b6ff"]
 )
 
 
@@ -529,8 +529,6 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
 
         st.markdown(f"### Oblačnost – {t:%d.%m.%y %H:%M} UTC")
 
-        fig = plt.figure(figsize=(10, 10))
-
         datasets = [
             (total, cmap_total, "Celková oblačnost"),
             (low, cmap_low, "Nízká"),
@@ -538,14 +536,17 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
             (high, cmap_high, "Vysoká"),
         ]
 
-        for i, (ds_var, cmap, title) in enumerate(datasets, 1):
+        for ds_var, cmap, title in datasets:
 
-            ax = plt.subplot(2, 2, i, projection=ccrs.Mercator())
+            fig = plt.figure(figsize=(10, 6))  # same as precip
+
+            ax = plt.axes(projection=ccrs.Mercator())
             ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
             data = ds_var.isel(step=idx) * 100
-            data_small = data[::2, ::2]
             data = data.where(data > 1)
+
+            data_small = data[::2, ::2]
 
             data_small.plot(
                 ax=ax,
@@ -558,12 +559,13 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
 
             ax.set_title(title)
 
-            ax.add_feature(cfeature.BORDERS, edgecolor="black", linewidth=1)
-            ax.add_feature(cfeature.COASTLINE, edgecolor="black", linewidth=1)
+            # ✅ borders like precip
+            ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+            ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
 
             ax.set_axis_off()
 
-        st.pyplot(fig)
+            st.pyplot(fig)
 
     ds_total.close()
     ds_low.close()
