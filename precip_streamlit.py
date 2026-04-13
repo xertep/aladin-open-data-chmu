@@ -458,8 +458,8 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
             transform=ccrs.PlateCarree(),
             scale=150,        # adjust visibility
             width=0.0075,
-            headwidth=5,
-            headlength=6,
+            headwidth=3,
+            headlength=4,
             headaxislength=3
         )
 
