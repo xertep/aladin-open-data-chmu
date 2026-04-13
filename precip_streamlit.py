@@ -19,6 +19,8 @@ run = st.selectbox("Běh modelu (UTC)", ["00", "06", "12", "18"])
 
 url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFPREC_TOTAL.grb.bz2"
 
+temp_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_CLSTEMPERATURE.grb.bz2"
+
 # st.write("Data URL:", url)
 
 # ---- LOAD DATA ----
@@ -34,6 +36,7 @@ def load_data(url):
     with tempfile.NamedTemporaryFile(suffix=".grb", delete=False) as f:
         f.write(grib_bytes)
         return f.name
+
 
 # 1. Define the boundaries (the numbers on the left of your image)
 # These are the 'edges' of the color blocks
@@ -153,3 +156,66 @@ if "path" in st.session_state:
         ax.set_axis_off()
 
         st.pyplot(fig, use_container_width=False)
+
+# ---- LOAD TEMPERATURE ----
+if st.button("Zobraz teplotu"):
+    st.session_state["temp_path"] = load_data(temp_url)
+
+if "temp_path" in st.session_state:
+    ds_temp = open_grib(st.session_state["temp_path"])
+
+    st.write("Teplota načtena")
+
+    temp = ds_temp[list(ds_temp.data_vars)[0]]
+
+    import pandas as pd
+    import cartopy.crs as ccrs
+    import cartopy.feature as cfeature
+
+    all_times = pd.to_datetime(temp.valid_time.values)
+    run_time = pd.to_datetime(ds_temp.time.values)
+
+    # ---- SELECT 3H STEPS ----
+    target_indices = []
+
+    for i, t in enumerate(all_times):
+        diff_hours = (t - run_time).total_seconds() / 3600
+
+        if diff_hours % 3 == 0:
+            target_indices.append(i)
+
+    # ---- LOOP ----
+    for idx in target_indices:
+        valid_time = all_times[idx]
+
+        # Kelvin -> Celsius
+        data = temp.isel(step=idx) - 273.15
+
+        st.markdown(f"### {valid_time:%d %H:%M} UTC")
+
+        data_small = data[::2, ::2]
+
+        fig = plt.figure(figsize=(10, 6))
+        ax = plt.axes(projection=ccrs.Mercator())
+
+        ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
+
+        im = data_small.plot(
+            ax=ax,
+            transform=ccrs.PlateCarree(),
+            cmap="coolwarm",
+            vmin=-20,
+            vmax=35,
+            add_colorbar=True,
+            add_labels=False,
+            cbar_kwargs={
+                "label": "Teplota (°C)"
+            }
+        )
+
+        ax.add_feature(cfeature.BORDERS, edgecolor="black", linewidth=1)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="black", linewidth=1)
+
+        ax.set_axis_off()
+
+        st.pyplot(fig)
