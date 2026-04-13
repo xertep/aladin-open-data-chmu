@@ -470,18 +470,20 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
         boundaries = [11, 14, 16, 18, 20, 23, 25, 27, 30]
         norm = mcolors.Normalize(vmin=11, vmax=30, clip=True)
 
-        im = gust_plot.plot(
-            ax=ax,
+        mesh = ax.pcolormesh(
+            gust_plot.longitude,
+            gust_plot.latitude,
+            gust_plot.values,
             transform=ccrs.PlateCarree(),
             cmap=gust_cmap,
             norm=norm,
-            alpha=0.6,
-            add_colorbar=True,
-            cbar_kwargs={
-                "label": "Vítr nárazy (m/s)",
-                "ticks": boundaries
-            }
+            shading="auto",
+            alpha=0.6
         )
+
+        cbar = plt.colorbar(mesh, ax=ax, orientation="vertical", pad=0.02)
+        cbar.set_label("Vítr nárazy (m/s)")
+        cbar.set_ticks([11, 15, 20, 25, 30])
 
         ax.set_title("")
 
