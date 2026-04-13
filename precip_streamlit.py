@@ -543,8 +543,9 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
             ax = plt.subplot(2, 2, i, projection=ccrs.Mercator())
             ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
-            data = ds_var.isel(step=idx)
+            data = ds_var.isel(step=idx) * 100
             data_small = data[::2, ::2]
+            data = data.where(data > 1)
 
             data_small.plot(
                 ax=ax,
