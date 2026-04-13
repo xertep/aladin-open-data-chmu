@@ -399,7 +399,7 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
         # -------------------------
         # DATA EXTRACTION
         # -------------------------
-        speed = ws.isel(step=idx) + 2
+        speed = ws.isel(step=idx)
         direction = wd.isel(step=idx)
 
         gust_field = gust.isel(step=idx)
@@ -410,9 +410,10 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
         v = -speed * np.cos(rad)
 
         wind_mag = np.sqrt(u**2 + v**2)
+        mask = wind_mag >= 1.5
 
-        u = u.where(wind_mag >= 1.5) # below 0.5 not showing
-        v = v.where(wind_mag >= 1.5)
+        u = u.where(mask) # below 1.5 not showing
+        v = v.where(mask)
 
         # thin grid (VERY important for barbs)
         skip = 10
