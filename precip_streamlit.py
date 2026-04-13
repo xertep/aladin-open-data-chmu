@@ -336,13 +336,13 @@ if layers["tminmax"] and "tmax_path" in st.session_state:
                 ax.text(
                     lons[j],
                     lats[i],
-                    f"{int(val)}",
+                    f"{int(val)}",   # no decimals
                     transform=ccrs.PlateCarree(),
                     ha="center",
                     va="center",
                     fontsize=8,
-                    color="white",
-                    path_effects=[pe.withStroke(linewidth=2, foreground="black")]
+                    color="black",
+                    alpha=0.7
                 )
 
         ax.add_feature(cfeature.BORDERS, edgecolor="black", linewidth=1)
@@ -352,10 +352,10 @@ if layers["tminmax"] and "tmax_path" in st.session_state:
 
         st.pyplot(fig)
 
-        ds_tmax.close()
-        ds_tmin.close()
+    ds_tmax.close()
+    ds_tmin.close()
 
-        del ds_tmax, tmax
-        del ds_tmin, tmin
+    del ds_tmax, tmax
+    del ds_tmin, tmin
 
 
