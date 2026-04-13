@@ -388,14 +388,6 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
     gu = ds_gu[list(ds_gu.data_vars)[0]]
     gv = ds_gv[list(ds_gv.data_vars)[0]]
 
-    st.write("WIND DEBUG")
-    st.write(list(ds_ws.data_vars))
-    st.write(ds_ws)
-
-    st.write(ds_gu)
-    st.write(list(ds_gu.data_vars))
-    st.write(ds_gu[var].dims)
-    st.write(ds_gu[var].isel(step=0))
 
     all_times = pd.to_datetime(ws.valid_time.values)
     run_time = pd.to_datetime(ds_ws.time.values)
