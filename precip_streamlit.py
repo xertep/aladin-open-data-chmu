@@ -7,11 +7,21 @@ import tempfile
 import numpy as np
 import matplotlib.colors as mcolors
 import matplotlib.ticker as ticker
+import pandas as pd
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 
 st.set_page_config(
     page_title="Aladin (open data ČHMÚ)",  # this changes the browser tab title
     page_icon="🌧️"                     # optional: emoji or path to an image
 )
+
+st.sidebar.title("Modelové vrstvy")
+
+layers = {
+    "precip": st.sidebar.checkbox("Srážky", True),
+    "temp": st.sidebar.checkbox("Teplota", False),
+}
 
 # ---- USER INPUT ----
 date = st.text_input("Datum (YYYYMMDD)", "20260412")
@@ -20,6 +30,13 @@ run = st.selectbox("Běh modelu (UTC)", ["00", "06", "12", "18"])
 url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFPREC_TOTAL.grb.bz2"
 
 temp_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_CLSTEMPERATURE.grb.bz2"
+
+
+
+if "precip_path" not in st.session_state:
+    if st.sidebar.button("Načíst model"):
+        st.session_state["precip_path"] = load_data(url)
+        st.session_state["temp_path"] = load_data(temp_url)
 
 # st.write("Data URL:", url)
 
@@ -77,15 +94,13 @@ def weather_formatter(x, pos):
         return f"{int(x)}"
     
 
-if st.button("Zobraz data"):
-    st.session_state["path"] = load_data(url)
 
 @st.cache_data
 def open_grib(path):
     return xr.open_dataset(path, engine="cfgrib")
 
-if "path" in st.session_state:
-    path = st.session_state["path"]
+if layers["precip"] and "precip_path" in st.session_state:
+    path = st.session_state["precip_path"]
 
     ds = open_grib(path)
 
@@ -93,9 +108,6 @@ if "path" in st.session_state:
 
     tp = ds[list(ds.data_vars)[0]]
 
-    import pandas as pd
-    import cartopy.crs as ccrs
-    import cartopy.feature as cfeature
 
     # All valid times
     all_times = pd.to_datetime(tp.valid_time.values)
@@ -157,20 +169,16 @@ if "path" in st.session_state:
 
         st.pyplot(fig, use_container_width=False)
 
-# ---- LOAD TEMPERATURE ----
-if st.button("Zobraz teplotu"):
-    st.session_state["temp_path"] = load_data(temp_url)
 
-if "temp_path" in st.session_state:
+
+# ---- LOAD TEMPERATURE ----
+
+if layers["temp"] and "temp_path" in st.session_state:
     ds_temp = open_grib(st.session_state["temp_path"])
 
     st.write("Teplota načtena")
 
     temp = ds_temp[list(ds_temp.data_vars)[0]]
-
-    import pandas as pd
-    import cartopy.crs as ccrs
-    import cartopy.feature as cfeature
 
     all_times = pd.to_datetime(temp.valid_time.values)
     run_time = pd.to_datetime(ds_temp.time.values)
@@ -219,3 +227,4 @@ if "temp_path" in st.session_state:
         ax.set_axis_off()
 
         st.pyplot(fig)
+
