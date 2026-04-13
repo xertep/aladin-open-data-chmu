@@ -459,16 +459,18 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
         # ---- GUST OVERLAY ----
-        gust_mask = gust_plot.where(gust_plot >= GUST_MIN)
+        # gust_mask = gust_plot.where(gust_plot >= GUST_MIN)
+
+        data = gust_plot
 
         gust_cmap = mcolors.LinearSegmentedColormap.from_list(
             "gusts", ["#ffdfdf", "#ffbfbf", "#ff9f9f", "#ff7f7f", "#ff6060", "#ff4040", "#ff2020", "#ff0000"]
         )
 
         boundaries = [11, 14, 16, 18, 20, 23, 25, 27, 30]
-        norm = mcolors.BoundaryNorm(boundaries, len(boundaries) - 1)
+        norm = mcolors.Normalize(vmin=11, vmax=30, clip=True)
 
-        im = gust_mask.plot(
+        im = gust_plot.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
             cmap=gust_cmap,
