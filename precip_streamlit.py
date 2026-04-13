@@ -24,6 +24,7 @@ layers = {
     "precip": st.sidebar.checkbox("Srážky", True),
     "temp": st.sidebar.checkbox("Teplota", False),
     "tminmax": st.sidebar.checkbox("Tmin / Tmax", False),
+    "wind": st.sidebar.checkbox("Vítr", False),
 }
 
 # ---- USER INPUT ----
@@ -38,6 +39,11 @@ tmax_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run
 
 tmin_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_CLSMINI_TEMPERAT.grb.bz2"
 
+wind_speed_url = f"https://opendata.chmi.cz/...CLSWIND_SPEED.grb.bz2"
+wind_dir_url   = f"https://opendata.chmi.cz/...CLSWIND_DIREC.grb.bz2"
+
+gust_u_url = f"https://opendata.chmi.cz/...CLSU_RAF_MOD_XFU.grb.bz2"
+gust_v_url = f"https://opendata.chmi.cz/...CLSV_RAF_MOD_XFU.grb.bz2"
 
 @st.cache_data(show_spinner=True)
 def load_data(url):
@@ -108,6 +114,12 @@ if st.sidebar.button("Načíst model"):
     if layers["tminmax"]:
         st.session_state["tmax_path"] = load_data(tmax_url)
         st.session_state["tmin_path"] = load_data(tmin_url)
+
+    if layers["wind"]:
+        st.session_state["wind_speed_path"] = load_data(wind_speed_url)
+        st.session_state["wind_dir_path"] = load_data(wind_dir_url)
+        st.session_state["gust_u_path"] = load_data(gust_u_url)
+        st.session_state["gust_v_path"] = load_data(gust_v_url)
         
 
 if layers["precip"] and "precip_path" in st.session_state:
@@ -358,5 +370,57 @@ if layers["tminmax"] and "tmax_path" in st.session_state:
 
     del ds_tmax, tmax
     del ds_tmin, tmin
+
+
+# ---- LOAD TMIN / TMAX ----
+if layers["wind"] and "wind_speed_path" in st.session_state:
+    ds_ws = open_grib(st.session_state["wind_speed_path"])
+    ds_wd = open_grib(st.session_state["wind_dir_path"])
+
+    ds_gu = open_grib(st.session_state["gust_u_path"])
+    ds_gv = open_grib(st.session_state["gust_v_path"])
+
+    ws = ds_ws[list(ds_ws.data_vars)[0]]
+    wd = ds_wd[list(ds_wd.data_vars)[0]]
+
+    gu = ds_gu[list(ds_gu.data_vars)[0]]
+    gv = ds_gv[list(ds_gv.data_vars)[0]]
+
+    all_times = pd.to_datetime(ws.valid_time.values)
+    run_time = pd.to_datetime(ds_ws.time.values)
+
+    for idx, t in enumerate(all_times):
+
+        diff_hours = (t - run_time).total_seconds() / 3600
+        if diff_hours % 3 != 0:
+            continue
+
+        speed = ws.isel(step=idx)
+        dir_deg = wd.isel(step=idx)
+
+        rad = np.deg2rad(dir_deg)
+
+        u = -speed * np.sin(rad)
+        v = -speed * np.cos(rad)
+
+        gust_list = []
+
+        for back in [0, 1, 2]:
+            i = idx - back
+            if i < 0:
+                continue
+
+            gu_now = gu.isel(step=i)
+            gv_now = gv.isel(step=i)
+
+            gust_speed = np.sqrt(gu_now**2 + gv_now**2)
+            gust_list.append(gust_speed)
+
+        gust_max = xr.concat(gust_list, dim="temp").max("temp")
+
+    ds_ws.close()
+    ds_wd.close()
+    ds_gu.close()
+    ds_gv.close()
 
 
