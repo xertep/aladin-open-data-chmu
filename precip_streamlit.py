@@ -188,7 +188,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
         data = data.clip(min=0)
         data = data.where(data >= 0.1)
 
-        st.markdown(f"### {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC")
+        st.markdown(f"## Srážky {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC")
         data_small = data[::2, ::2]
 
         # ---- MAP ----
@@ -253,7 +253,7 @@ if layer == "Teplota" and "temp_path" in st.session_state:
         # Kelvin -> Celsius
         data = temp.isel(step=idx) - 273.15
 
-        st.markdown(f"Teplota - {t:%d.%m.%y %H:%M} UTC")
+        st.markdown(f"## Teplota - {t:%d.%m.%y %H:%M} UTC")
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]   # controls density (bigger = fewer labels)
@@ -339,7 +339,7 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
         else:
             continue
 
-        st.markdown(f"{title} - {hour} UTC")
+        st.markdown(f"## {title}")
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]
@@ -451,7 +451,7 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
         # -------------------------
         # PLOT
         # -------------------------
-        st.markdown(f"### Vítr – {t:%d.%m.%y %H:%M} UTC")
+        st.markdown(f"## Vítr – {t:%d.%m.%y %H:%M} UTC")
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
@@ -461,17 +461,21 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
         # ---- GUST OVERLAY ----
         gust_mask = gust_plot.where(gust_plot >= GUST_MIN)
 
+        gust_cmap = mcolors.LinearSegmentedColormap.from_list(
+            "gusts", ["#ffdfdf", "#ffbfbf", "#ff9f9f", "#ff7f7f", "#ff6060", "#ff4040", "#ff2020", "#ff0000"]
+        )
+
         im = gust_mask.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
-            cmap="inferno",
+            cmap=gust_cmap,
             vmin=GUST_MIN,
             vmax=GUST_MAX,
             alpha=0.6,
             add_colorbar=True,
             cbar_kwargs={
                 "label": "Vítr nárazy (m/s)",
-                "ticks": [11, 15, 20, 25, 30]
+                "ticks": [11, 13, 15, 18, 20, 23, 25, 27, 30]
             }
         )
 
@@ -527,7 +531,7 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
         if diff_hours % 3 != 0:
             continue
 
-        st.markdown(f"### Oblačnost – {t:%d.%m.%y %H:%M} UTC")
+        st.markdown(f"## Oblačnost – {t:%d.%m.%y %H:%M} UTC")
 
         datasets = [
             (total, cmap_total, "Celková oblačnost"),
