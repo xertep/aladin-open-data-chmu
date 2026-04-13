@@ -96,6 +96,8 @@ def weather_formatter(x, pos):
     else:
         return f"{int(x)}"
     
+GUST_MIN = 11
+GUST_MAX = 30
 
 
 @st.cache_data
@@ -372,7 +374,6 @@ if layers["tminmax"] and "tmax_path" in st.session_state:
     del ds_tmin, tmin
 
 
-# ---- LOAD TMIN / TMAX ----
 # ---- WIND ----
 if layers["wind"] and "wind_speed_path" in st.session_state:
 
@@ -426,15 +427,20 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
         # ---- GUST OVERLAY ----
-        gust_mask = gust_plot.where(gust_plot >= 11)
+        gust_mask = gust_plot.where(gust_plot >= GUST_MIN)
 
         im = gust_mask.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
             cmap="inferno",
-            alpha=0.5,
+            vmin=GUST_MIN,
+            vmax=GUST_MAX,
+            alpha=0.6,
             add_colorbar=True,
-            cbar_kwargs={"label": "Gust (m/s)"}
+            cbar_kwargs={
+                "label": "Gust (m/s)",
+                "ticks": [11, 15, 20, 25, 30]
+            }
         )
 
         # ---- WIND BARBS ----
