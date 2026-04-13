@@ -11,6 +11,7 @@ import matplotlib.patheffects as pe
 import pandas as pd
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+from datetime import datetime
 
 st.set_page_config(
     page_title="Aladin (open data ČHMÚ)",  # this changes the browser tab title
@@ -26,7 +27,7 @@ layers = {
 }
 
 # ---- USER INPUT ----
-date = st.text_input("Datum (YYYYMMDD)", "20260412")
+date = st.text_input("Datum (YYYYMMDD)", datetime.today().strftime('%Y%m%d'))
 run = st.selectbox("Běh modelu (UTC)", ["00", "06", "12", "18"])
 
 url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFPREC_TOTAL.grb.bz2"
