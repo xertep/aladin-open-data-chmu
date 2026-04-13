@@ -339,7 +339,7 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
         else:
             continue
 
-        st.markdown(f"## {title}")
+        st.markdown(f"## {title} {hour} UTC")
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]
