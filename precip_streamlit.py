@@ -24,6 +24,7 @@ layers = {
     "precip": st.sidebar.checkbox("Srážky", True),
     "temp": st.sidebar.checkbox("Teplota", False),
     "tminmax": st.sidebar.checkbox("Tmin / Tmax", False),
+    "wind": st.sidebar.checkbox("Vítr", False),
 }
 
 # ---- USER INPUT ----
@@ -38,6 +39,11 @@ tmax_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run
 
 tmin_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_CLSMINI_TEMPERAT.grb.bz2"
 
+wind_speed_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_CLSWIND_SPEED.grb.bz2"
+wind_dir_url   = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_CLSWIND_DIREC.grb.bz2"
+
+gust_u_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_CLSRAFAL_MOD_XFU.grb.bz2"
+gust_v_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_CLSRAFAL_MOD_XFU.grb.bz2"
 
 @st.cache_data(show_spinner=True)
 def load_data(url):
@@ -108,6 +114,12 @@ if st.sidebar.button("Načíst model"):
     if layers["tminmax"]:
         st.session_state["tmax_path"] = load_data(tmax_url)
         st.session_state["tmin_path"] = load_data(tmin_url)
+
+    if layers["wind"]:
+        st.session_state["wind_speed_path"] = load_data(wind_speed_url)
+        st.session_state["wind_dir_path"] = load_data(wind_dir_url)
+        st.session_state["gust_u_path"] = load_data(gust_u_url)
+        st.session_state["gust_v_path"] = load_data(gust_v_url)
         
 
 if layers["precip"] and "precip_path" in st.session_state:
@@ -359,4 +371,92 @@ if layers["tminmax"] and "tmax_path" in st.session_state:
     del ds_tmax, tmax
     del ds_tmin, tmin
 
+
+# ---- LOAD TMIN / TMAX ----
+# ---- WIND ----
+if layers["wind"] and "wind_speed_path" in st.session_state:
+
+    ds_ws = open_grib(st.session_state["wind_speed_path"])
+    ds_wd = open_grib(st.session_state["wind_dir_path"])
+    ds_gust = open_grib(st.session_state["gust_u_path"])  # scalar gust field (assumed)
+
+    ws = ds_ws[list(ds_ws.data_vars)[0]]
+    wd = ds_wd[list(ds_wd.data_vars)[0]]
+    gust = ds_gust[list(ds_gust.data_vars)[0]]
+
+    all_times = pd.to_datetime(ws.valid_time.values)
+    run_time = pd.to_datetime(ds_ws.time.values)
+
+    for idx, t in enumerate(all_times):
+
+        diff_hours = (t - run_time).total_seconds() / 3600
+
+        # only 3-hour steps
+        if diff_hours % 3 != 0:
+            continue
+
+        # -------------------------
+        # DATA EXTRACTION
+        # -------------------------
+        speed = ws.isel(step=idx)
+        direction = wd.isel(step=idx)
+
+        gust_field = gust.isel(step=idx)
+
+        # convert wind to u/v
+        rad = np.deg2rad(direction)
+        u = -speed * np.sin(rad)
+        v = -speed * np.cos(rad)
+
+        # thin grid (VERY important for barbs)
+        skip = 10
+        u_plot = u[::skip, ::skip]
+        v_plot = v[::skip, ::skip]
+
+        gust_plot = gust_field[::2, ::2]  # finer resolution for shading
+
+        # -------------------------
+        # PLOT
+        # -------------------------
+        st.markdown(f"### Wind – {t:%d %H:%M} UTC")
+
+        fig = plt.figure(figsize=(10, 6))
+        ax = plt.axes(projection=ccrs.Mercator())
+
+        ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
+
+        # ---- GUST OVERLAY ----
+        gust_mask = gust_plot.where(gust_plot >= 11)
+
+        im = gust_mask.plot(
+            ax=ax,
+            transform=ccrs.PlateCarree(),
+            cmap="inferno",
+            alpha=0.5,
+            add_colorbar=True,
+            cbar_kwargs={"label": "Gust (m/s)"}
+        )
+
+        # ---- WIND BARBS ----
+        ax.barbs(
+            u_plot.longitude,
+            u_plot.latitude,
+            u_plot.values,
+            v_plot.values,
+            transform=ccrs.PlateCarree(),
+            length=5,
+            linewidth=0.6
+        )
+
+        # ---- MAP FEATURES ----
+        ax.add_feature(cfeature.BORDERS, edgecolor="black", linewidth=1)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="black", linewidth=1)
+
+        ax.set_axis_off()
+
+        st.pyplot(fig)
+
+    ds_ws.close()
+    ds_wd.close()
+    ds_gust.close()
 
