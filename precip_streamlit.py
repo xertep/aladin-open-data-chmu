@@ -399,7 +399,7 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
         # -------------------------
         # DATA EXTRACTION
         # -------------------------
-        speed = ws.isel(step=idx) * 1.2
+        speed = ws.isel(step=idx) + 2
         direction = wd.isel(step=idx)
 
         gust_field = gust.isel(step=idx)
