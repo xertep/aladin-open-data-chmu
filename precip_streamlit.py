@@ -32,27 +32,17 @@ url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALA
 temp_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_CLSTEMPERATURE.grb.bz2"
 
 
-
-if "precip_path" not in st.session_state:
-    if st.sidebar.button("Načíst model"):
-        st.session_state["precip_path"] = load_data(url)
-        st.session_state["temp_path"] = load_data(temp_url)
-
-# st.write("Data URL:", url)
-
-# ---- LOAD DATA ----
 @st.cache_data(show_spinner=True)
 def load_data(url):
     r = requests.get(url)
     compressed = r.content
 
-    # decompress bz2
     grib_bytes = bz2.decompress(compressed)
 
-    # save to temp file (cfgrib needs file path)
     with tempfile.NamedTemporaryFile(suffix=".grb", delete=False) as f:
         f.write(grib_bytes)
         return f.name
+
 
 
 # 1. Define the boundaries (the numbers on the left of your image)
@@ -98,6 +88,12 @@ def weather_formatter(x, pos):
 @st.cache_data
 def open_grib(path):
     return xr.open_dataset(path, engine="cfgrib")
+
+
+if st.sidebar.button("Načíst model"):
+    st.session_state["precip_path"] = load_data(url)
+    st.session_state["temp_path"] = load_data(temp_url)
+        
 
 if layers["precip"] and "precip_path" in st.session_state:
     path = st.session_state["precip_path"]
