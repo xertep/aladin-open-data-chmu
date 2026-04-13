@@ -220,8 +220,8 @@ if layer == "Srážky" and "precip_path" in st.session_state:
 
         st.pyplot(fig, use_container_width=False)
 
-        ds.close()
-        del ds, tp
+    ds.close()
+    del ds, tp
 
 
 
@@ -306,9 +306,9 @@ if layer == "Teplota" and "temp_path" in st.session_state:
 
         st.pyplot(fig)
 
-        ds_temp.close()
+    ds_temp.close()
 
-        del ds_temp, temp
+    del ds_temp, temp
 
 
 # ---- LOAD TMIN / TMAX ----
