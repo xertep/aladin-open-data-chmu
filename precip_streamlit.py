@@ -409,7 +409,7 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
         u = -speed * np.sin(rad)
         v = -speed * np.cos(rad)
 
-        wind_mag = np.sqrt(u**2 + v**2)
+        wind_mag = np.sqrt(u**2 + v**2) + 2
         mask = wind_mag >= 1.5
 
         u = u.where(mask) # below 1.5 not showing
