@@ -471,7 +471,7 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
             cmap=gust_cmap,
             vmin=GUST_MIN,
             vmax=GUST_MAX,
-            alpha=0.6,
+            alpha=1.0,
             add_colorbar=True,
             cbar_kwargs={
                 "label": "Vítr nárazy (m/s)",
