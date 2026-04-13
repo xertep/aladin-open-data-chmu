@@ -253,7 +253,7 @@ if layer == "Teplota" and "temp_path" in st.session_state:
         # Kelvin -> Celsius
         data = temp.isel(step=idx) - 273.15
 
-        st.markdown(f"###Teplota - {t:%d.%m.%y %H:%M} UTC")
+        st.markdown(f"Teplota - {t:%d.%m.%y %H:%M} UTC")
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]   # controls density (bigger = fewer labels)
@@ -339,7 +339,7 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
         else:
             continue
 
-        st.markdown(f"### {title} – {t:%d.%m.%y %H:%M} UTC")
+        st.markdown(f"{title}")
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]
