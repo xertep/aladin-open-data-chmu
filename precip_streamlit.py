@@ -372,10 +372,6 @@ if layers["tminmax"] and "tmax_path" in st.session_state:
     del ds_tmin, tmin
 
 
-if layers["wind"]:
-    st.write("WIND DEBUG")
-    st.write(list(ds_ws.data_vars))
-    st.write(ds_ws)
 
 
 # ---- LOAD TMIN / TMAX ----
@@ -391,6 +387,10 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
 
     gu = ds_gu[list(ds_gu.data_vars)[0]]
     gv = ds_gv[list(ds_gv.data_vars)[0]]
+
+    st.write("WIND DEBUG")
+    st.write(list(ds_ws.data_vars))
+    st.write(ds_ws)
 
     st.write(ds_gu)
     st.write(list(ds_gu.data_vars))
