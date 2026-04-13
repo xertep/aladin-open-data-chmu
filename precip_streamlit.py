@@ -150,7 +150,7 @@ if st.sidebar.button("Načíst model"):
         st.session_state["cloud_high_path"]  = load_data(cloud_high_url)
         
 
-if layers["precip"] and "precip_path" in st.session_state:
+if layer == "Srážky" and "precip_path" in st.session_state:
     path = st.session_state["precip_path"]
 
     ds = open_grib(path)
@@ -227,7 +227,7 @@ if layers["precip"] and "precip_path" in st.session_state:
 
 # ---- LOAD TEMPERATURE ----
 
-if layers["temp"] and "temp_path" in st.session_state:
+if layer == "Teplota" and "temp_path" in st.session_state:
     ds_temp = open_grib(st.session_state["temp_path"])
 
     st.write("Teplota načtena")
@@ -312,7 +312,7 @@ if layers["temp"] and "temp_path" in st.session_state:
 
 
 # ---- LOAD TMIN / TMAX ----
-if layers["tminmax"] and "tmax_path" in st.session_state:
+if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
 
     ds_tmax = open_grib(st.session_state["tmax_path"])
     ds_tmin = open_grib(st.session_state["tmin_path"])
@@ -401,7 +401,7 @@ if layers["tminmax"] and "tmax_path" in st.session_state:
 
 
 # ---- WIND ----
-if layers["wind"] and "wind_speed_path" in st.session_state:
+if layer == "Vítr" and "wind_speed_path" in st.session_state:
 
     ds_ws = open_grib(st.session_state["wind_speed_path"])
     ds_wd = open_grib(st.session_state["wind_dir_path"])
