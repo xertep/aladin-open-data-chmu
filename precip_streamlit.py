@@ -96,10 +96,16 @@ def open_grib(path):
 
 
 if st.sidebar.button("Načíst model"):
-    st.session_state["precip_path"] = load_data(url)
-    st.session_state["temp_path"] = load_data(temp_url)
-    st.session_state["tmax_path"] = load_data(tmax_url)
-    st.session_state["tmin_path"] = load_data(tmin_url)
+
+    if layers["precip"]:
+        st.session_state["precip_path"] = load_data(url)
+
+    if layers["temp"]:
+        st.session_state["temp_path"] = load_data(temp_url)
+
+    if layers["tminmax"]:
+        st.session_state["tmax_path"] = load_data(tmax_url)
+        st.session_state["tmin_path"] = load_data(tmin_url)
         
 
 if layers["precip"] and "precip_path" in st.session_state:
@@ -171,6 +177,10 @@ if layers["precip"] and "precip_path" in st.session_state:
         ax.set_axis_off()
 
         st.pyplot(fig, use_container_width=False)
+
+        del ds, tp
+
+ds.close()
 
 
 
@@ -254,6 +264,10 @@ if layers["temp"] and "temp_path" in st.session_state:
         ax.set_axis_off()
 
         st.pyplot(fig)
+
+        del ds_temp, temp
+
+ds_temp.close()
 
 
 # ---- LOAD TMIN / TMAX ----
@@ -341,4 +355,10 @@ if layers["tminmax"] and "tmax_path" in st.session_state:
         ax.set_axis_off()
 
         st.pyplot(fig)
+
+        del ds_tmax, tmax
+        del ds_tmin, tmin
+
+ds_tmax.close()
+ds_tmin.close()
 
