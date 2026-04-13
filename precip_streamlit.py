@@ -20,12 +20,11 @@ st.set_page_config(
 
 st.sidebar.title("Modelové vrstvy")
 
-layers = {
-    "precip": st.sidebar.checkbox("Srážky", True),
-    "temp": st.sidebar.checkbox("Teplota", False),
-    "tminmax": st.sidebar.checkbox("Tmin / Tmax", False),
-    "wind": st.sidebar.checkbox("Vítr", False),
-}
+layer = st.sidebar.radio(
+    "Vyber vrstvu",
+    ["Srážky", "Teplota", "Tmin / Tmax", "Vítr", "Oblačnost"],
+    index=0
+)
 
 # ---- USER INPUT ----
 date = st.text_input("Datum (YYYYMMDD)", datetime.today().strftime('%Y%m%d'))
@@ -44,6 +43,11 @@ wind_dir_url   = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1k
 
 gust_u_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_CLSRAFAL_MOD_XFU.grb.bz2"
 gust_v_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_CLSRAFAL_MOD_XFU.grb.bz2"
+
+cloud_total_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFNEBUL_TOTALE.grb.bz2"
+cloud_low_url   = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFNEBUL_BASSE.grb.bz2"
+cloud_mid_url   = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFNEBUL_MOYENN.grb.bz2"
+cloud_high_url  = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFNEBUL_HAUTE.grb.bz2"
 
 @st.cache_data(show_spinner=True)
 def load_data(url):
@@ -100,6 +104,23 @@ GUST_MIN = 11
 GUST_MAX = 30
 
 
+cloud_norm = mcolors.Normalize(vmin=0, vmax=100)
+
+cmap_total = "Greys"
+
+cmap_low = mcolors.LinearSegmentedColormap.from_list(
+    "low_clouds", ["black", "yellow"]
+)
+
+cmap_mid = mcolors.LinearSegmentedColormap.from_list(
+    "mid_clouds", ["black", "green"]
+)
+
+cmap_high = mcolors.LinearSegmentedColormap.from_list(
+    "high_clouds", ["black", "blue"]
+)
+
+
 @st.cache_data
 def open_grib(path):
     return xr.open_dataset(path, engine="cfgrib")
@@ -107,21 +128,26 @@ def open_grib(path):
 
 if st.sidebar.button("Načíst model"):
 
-    if layers["precip"]:
+    if layer == "Srážky":
         st.session_state["precip_path"] = load_data(url)
 
-    if layers["temp"]:
+    elif layer == "Teplota":
         st.session_state["temp_path"] = load_data(temp_url)
 
-    if layers["tminmax"]:
+    elif layer == "Tmin / Tmax":
         st.session_state["tmax_path"] = load_data(tmax_url)
         st.session_state["tmin_path"] = load_data(tmin_url)
 
-    if layers["wind"]:
+    elif layer == "Vítr":
         st.session_state["wind_speed_path"] = load_data(wind_speed_url)
         st.session_state["wind_dir_path"] = load_data(wind_dir_url)
         st.session_state["gust_u_path"] = load_data(gust_u_url)
-        st.session_state["gust_v_path"] = load_data(gust_v_url)
+
+    elif layer == "Oblačnost":
+        st.session_state["cloud_total_path"] = load_data(cloud_total_url)
+        st.session_state["cloud_low_path"]   = load_data(cloud_low_url)
+        st.session_state["cloud_mid_path"]   = load_data(cloud_mid_url)
+        st.session_state["cloud_high_path"]  = load_data(cloud_high_url)
         
 
 if layers["precip"] and "precip_path" in st.session_state:
@@ -476,4 +502,70 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
     ds_ws.close()
     ds_wd.close()
     ds_gust.close()
+
+
+# ---- CLOUDS ----
+if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
+
+    ds_total = open_grib(st.session_state["cloud_total_path"])
+    ds_low   = open_grib(st.session_state["cloud_low_path"])
+    ds_mid   = open_grib(st.session_state["cloud_mid_path"])
+    ds_high  = open_grib(st.session_state["cloud_high_path"])
+
+    total = ds_total[list(ds_total.data_vars)[0]]
+    low   = ds_low[list(ds_low.data_vars)[0]]
+    mid   = ds_mid[list(ds_mid.data_vars)[0]]
+    high  = ds_high[list(ds_high.data_vars)[0]]
+
+    all_times = pd.to_datetime(total.valid_time.values)
+    run_time = pd.to_datetime(ds_total.time.values)
+
+    for idx, t in enumerate(all_times):
+
+        diff_hours = (t - run_time).total_seconds() / 3600
+
+        if diff_hours % 3 != 0:
+            continue
+
+        st.markdown(f"### Oblačnost – {t:%d.%m.%y %H:%M} UTC")
+
+        fig = plt.figure(figsize=(10, 10))
+
+        datasets = [
+            (total, cmap_total, "Celková oblačnost"),
+            (low, cmap_low, "Nízká"),
+            (mid, cmap_mid, "Střední"),
+            (high, cmap_high, "Vysoká"),
+        ]
+
+        for i, (ds_var, cmap, title) in enumerate(datasets, 1):
+
+            ax = plt.subplot(2, 2, i, projection=ccrs.Mercator())
+            ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
+
+            data = ds_var.isel(step=idx)
+            data_small = data[::2, ::2]
+
+            data_small.plot(
+                ax=ax,
+                transform=ccrs.PlateCarree(),
+                cmap=cmap,
+                norm=cloud_norm,
+                add_colorbar=True,
+                cbar_kwargs={"label": "%"}
+            )
+
+            ax.set_title(title)
+
+            ax.add_feature(cfeature.BORDERS, edgecolor="black", linewidth=1)
+            ax.add_feature(cfeature.COASTLINE, edgecolor="black", linewidth=1)
+
+            ax.set_axis_off()
+
+        st.pyplot(fig)
+
+    ds_total.close()
+    ds_low.close()
+    ds_mid.close()
+    ds_high.close()
 
