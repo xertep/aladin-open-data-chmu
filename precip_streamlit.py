@@ -324,7 +324,7 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
     run_time = pd.to_datetime(ds_tmax.time.values)
 
     for idx, valid_time in enumerate(all_times):
-        diff_hours = (t - run_time).total_seconds() / 3600
+
         hour = valid_time.hour
 
         # ---- SELECT ONLY 06 and 18 UTC ----
@@ -339,7 +339,7 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
         else:
             continue
 
-        st.markdown(f"## {title} - {t:%d.%m.%y %H:%M} UTC")
+        st.markdown(f"## {title} - {valid_time:%d.%m.%y %H:%M} UTC")
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]
