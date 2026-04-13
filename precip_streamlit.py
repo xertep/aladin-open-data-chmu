@@ -416,7 +416,7 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
         v = v.where(mask)
 
         # thin grid (VERY important for barbs)
-        skip = 10
+        skip = 25
         u_plot = u[::skip, ::skip]
         v_plot = v[::skip, ::skip]
 
@@ -457,9 +457,9 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
             v_plot.values,
             transform=ccrs.PlateCarree(),
             scale=150,        # adjust visibility
-            width=0.0025,
-            headwidth=3,
-            headlength=4,
+            width=0.0075,
+            headwidth=5,
+            headlength=6,
             headaxislength=3
         )
 
