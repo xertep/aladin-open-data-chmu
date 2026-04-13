@@ -109,15 +109,15 @@ cloud_norm = mcolors.Normalize(vmin=0, vmax=100)
 cmap_total = "Greys"
 
 cmap_low = mcolors.LinearSegmentedColormap.from_list(
-    "low_clouds", ["black", "#ffff49"]
+    "low_clouds", ["#00000000", "#ffff49"]
 )
 
 cmap_mid = mcolors.LinearSegmentedColormap.from_list(
-    "mid_clouds", ["black", "#b6ffb6"]
+    "mid_clouds", ["#00000000", "#b6ffb6"]
 )
 
 cmap_high = mcolors.LinearSegmentedColormap.from_list(
-    "high_clouds", ["black", "#b6b6ff"]
+    "high_clouds", ["#00000000", "#b6b6ff"]
 )
 
 
