@@ -411,8 +411,8 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
 
         wind_mag = np.sqrt(u**2 + v**2)
 
-        u = u.where(wind_mag >= 0.5) # below 0.5 not showing
-        v = v.where(wind_mag >= 0.5)
+        u = u.where(wind_mag >= 1.5) # below 0.5 not showing
+        v = v.where(wind_mag >= 1.5)
 
         # thin grid (VERY important for barbs)
         skip = 10
