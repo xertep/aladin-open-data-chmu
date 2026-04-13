@@ -416,7 +416,7 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
         v = v.where(mask)
 
         # thin grid (VERY important for barbs)
-        skip = 25
+        skip = 20
         u_plot = u[::skip, ::skip]
         v_plot = v[::skip, ::skip]
 
@@ -425,7 +425,7 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
         # -------------------------
         # PLOT
         # -------------------------
-        st.markdown(f"### Wind – {t:%d %H:%M} UTC")
+        st.markdown(f"### Vítr – {t:%d.%m.%y %H:%M} UTC")
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
@@ -444,10 +444,12 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
             alpha=0.6,
             add_colorbar=True,
             cbar_kwargs={
-                "label": "Gust (m/s)",
+                "label": "Vítr nárazy (m/s)",
                 "ticks": [11, 15, 20, 25, 30]
             }
         )
+
+        ax.set_title("")
 
         # ---- WIND ARROWS (QUIVER) ----
         ax.quiver(
