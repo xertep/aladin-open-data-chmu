@@ -544,7 +544,7 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
             ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
             data = ds_var.isel(step=idx) * 100
-            data = data.where(data > 1)
+            #data = data.where(data > 1)
 
             data_small = data[::2, ::2]
 
