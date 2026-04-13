@@ -409,7 +409,7 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
         u = -speed * np.sin(rad)
         v = -speed * np.cos(rad)
 
-        wind_mag = np.sqrt(u**2 + v**2) + 2
+        wind_mag = np.sqrt(u**2 + v**2)
         mask = wind_mag >= 1.5
 
         u = u.where(mask) # below 1.5 not showing
@@ -449,15 +449,18 @@ if layers["wind"] and "wind_speed_path" in st.session_state:
             }
         )
 
-        # ---- WIND BARBS ----
-        ax.barbs(
+        # ---- WIND ARROWS (QUIVER) ----
+        ax.quiver(
             u_plot.longitude,
             u_plot.latitude,
             u_plot.values,
             v_plot.values,
             transform=ccrs.PlateCarree(),
-            length=5,
-            linewidth=0.6
+            scale=400,        # adjust visibility
+            width=0.0025,
+            headwidth=3,
+            headlength=4,
+            headaxislength=3
         )
 
         # ---- MAP FEATURES ----
