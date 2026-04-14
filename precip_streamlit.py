@@ -213,7 +213,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
 
     ds = open_grib(path)
 
-    st.write("Data načtena")
+    # st.write("Data načtena")
 
     tp = ds[list(ds.data_vars)[0]]
 
@@ -512,7 +512,7 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
 if layer == "Teplota" and "temp_path" in st.session_state:
     ds_temp = open_grib(st.session_state["temp_path"])
 
-    st.write("Teplota načtena")
+    # st.write("Teplota načtena")
 
     temp = ds_temp[list(ds_temp.data_vars)[0]]
 
@@ -535,7 +535,7 @@ if layer == "Teplota" and "temp_path" in st.session_state:
         # Kelvin -> Celsius
         data = temp.isel(step=idx) - 273.15
 
-        st.markdown(f"#### Teplota - {t:%d.%m.%y %H:%M} UTC ▼")
+        st.markdown(f"#### Teplota - {valid_time:%d.%m.%y %H:%M} UTC ▼")
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]   # controls density (bigger = fewer labels)
