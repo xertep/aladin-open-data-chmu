@@ -136,28 +136,28 @@ cmap_high = mcolors.LinearSegmentedColormap.from_list(
 
 
 ptype_map = {
-        11: 1,   # drizzle
-        1: 2,    # rain
-        5: 3,    # snow
-        6: 3,
-        7: 4,    # mix
-        193: 5,  # slush
-        8: 6,
-        3: 6,
-        9: 7,
-        10: 8,
-        12: 1
-    }
+    11: 1,   # drizzle
+    1: 2,    # rain
+    5: 3,    # snow
+    6: 3,
+    7: 4,    # mix
+    193: 5,  # slush
+    8: 6,
+    3: 6,
+    9: 7,
+    10: 8,
+    12: 1
+}
 
-    def to_severity(da):
-        da = xr.where(da >= 200, da - 200, da)
+def to_severity(da):
+    da = xr.where(da >= 200, da - 200, da)
 
-        out = xr.full_like(da, np.nan)
+    out = xr.full_like(da, np.nan)
 
-        for k, v in ptype_map.items():
-            out = out.where(da != k, v)
+    for k, v in ptype_map.items():
+        out = out.where(da != k, v)
 
-        return out
+    return out
 
 
 @st.cache_data
