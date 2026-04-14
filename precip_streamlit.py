@@ -330,6 +330,8 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
 
     run_time = pd.to_datetime(ds_ptype.time.values)
 
+    window_hours = 3
+
     for idx, t in enumerate(all_times):
 
         diff_hours = (t - run_time).total_seconds() / 3600
