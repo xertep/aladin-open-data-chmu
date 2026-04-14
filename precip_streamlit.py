@@ -421,6 +421,7 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         # =====================================================
         # 5) PLOT
         # =====================================================
+        st.markdown(f"## Typ srážek – {t:%d.%m.%Y %H:%M} UTC ({window_hours}h max severity)")
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
@@ -463,14 +464,14 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         patches = [
             mpatches.Patch(
                 color=colors[i - 1],
-                label=f"{i} - {labels[i]}"
+                label=f"{labels[i]}"
             )
             for i in range(1, 12)
         ]
 
         ax.legend(
             handles=patches,
-            loc="lower left",
+            loc="upper right",
             fontsize=8,
             frameon=True
         )
