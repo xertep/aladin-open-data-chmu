@@ -135,6 +135,31 @@ cmap_high = mcolors.LinearSegmentedColormap.from_list(
 )
 
 
+ptype_map = {
+        11: 1,   # drizzle
+        1: 2,    # rain
+        5: 3,    # snow
+        6: 3,
+        7: 4,    # mix
+        193: 5,  # slush
+        8: 6,
+        3: 6,
+        9: 7,
+        10: 8,
+        12: 1
+    }
+
+    def to_severity(da):
+        da = xr.where(da >= 200, da - 200, da)
+
+        out = xr.full_like(da, np.nan)
+
+        for k, v in ptype_map.items():
+            out = out.where(da != k, v)
+
+        return out
+
+
 @st.cache_data
 def open_grib(path):
     return xr.open_dataset(path, engine="cfgrib")
@@ -302,52 +327,65 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
     ptype = ds_ptype[list(ds_ptype.data_vars)[0]]
 
     all_times = pd.to_datetime(ptype.valid_time.values)
+
     run_time = pd.to_datetime(ds_ptype.time.values)
 
     for idx, t in enumerate(all_times):
 
         diff_hours = (t - run_time).total_seconds() / 3600
 
-        if diff_hours % 1 != 0:   # hourly field
+        if diff_hours % window_hours != 0:
             continue
 
-        data = ptype.isel(step=idx)
+        # -----------------------------------
+        # TAKE LAST N HOURS
+        # -----------------------------------
+        window_sev = []
 
-        # remove "občasné/trvalé" encoding if needed
-        data = xr.where(data >= 200, data - 200, data)
+        for h in range(window_hours):
+            idx_h = idx - h
+            if idx_h < 0:
+                continue
 
-        st.markdown(f"## Typ srážek – {t:%d.%m.%y %H:%M} UTC")
+            raw = ptype.isel(step=idx_h)
+            sev = to_severity(raw)
+            window_sev.append(sev)
 
-        data_small = data[::2, ::2]
+        if not window_sev:
+            continue
 
-        # categorical colormap
-        colors = {
-            1: "#4da6ff",   # rain
-            5: "#ffffff",   # snow
-            6: "#cce6ff",   # wet snow
-            7: "#ffcc66",   # mix
-            8: "#999999",   # freezing rain
-            9: "#cccccc",   # small hail
-            10: "#b3b3b3",  # hail
-            11: "#66ccff",  # drizzle
-            12: "#66ffff",  # freezing drizzle
-            3: "#ff3333",   # strong freezing rain
-            193: "#ff99cc"  # slush
-        }
+        # MAX = most dangerous type in window
+        ptype_final = xr.concat(window_sev, dim="t").max(dim="t")
 
-        cmap = mcolors.ListedColormap(list(colors.values()))
-        norm = mcolors.BoundaryNorm(list(colors.keys()), cmap.N)
+        # -----------------------------------
+        # PLOT
+        # -----------------------------------
+        st.markdown(f"## Typ srážek – {t:%d.%m.%Y %H:%M} UTC ({window_hours}h max severity)")
+
+        data_small = ptype_final[::2, ::2]
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
 
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
+        cmap = mcolors.ListedColormap([
+            "#ffffff",  # 1 drizzle
+            "#4da6ff",  # 2 rain
+            "#66ccff",  # 3 snow
+            "#ffcc66",  # 4 mix
+            "#ff99cc",  # 5 slush
+            "#999999",  # 6 freezing rain
+            "#cccccc",  # 7 hail
+            "#b3b3b3",  # 8 hail strong
+        ])
+
         data_small.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
             cmap=cmap,
-            norm=norm,
+            vmin=1,
+            vmax=8,
             add_colorbar=False
         )
 
