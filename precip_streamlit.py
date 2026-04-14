@@ -227,7 +227,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
         data = data.where(data >= 0.1)
 
         st.markdown(
-            f"#### Srážky {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC (72h)"
+            f"#### Srážky {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC (72h) ▼"
         )
 
         data_small = data[::2, ::2]
@@ -287,7 +287,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
             data = data.where(data >= 0.1)
 
             st.markdown(
-                f"#### Srážky {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC ({window_hours}h)"
+                f"#### Srážky {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC ({window_hours}h) ▼"
             )
 
             data_small = data[::2, ::2]
@@ -434,7 +434,7 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         # =====================================================
         # 5) PLOT
         # =====================================================
-        st.markdown(f"#### Typ srážek – {t:%d.%m.%Y %H:%M} UTC ({window_hours}h nejnebezpečnější typ)")
+        st.markdown(f"#### Typ srážek – {t:%d.%m.%Y %H:%M} UTC ({window_hours}h nejnebezpečnější typ) ▼")
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
@@ -523,7 +523,7 @@ if layer == "Teplota" and "temp_path" in st.session_state:
         # Kelvin -> Celsius
         data = temp.isel(step=idx) - 273.15
 
-        st.markdown(f"#### Teplota - {t:%d.%m.%y %H:%M} UTC")
+        st.markdown(f"#### Teplota - {t:%d.%m.%y %H:%M} UTC ▼")
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]   # controls density (bigger = fewer labels)
@@ -609,7 +609,7 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
         else:
             continue
 
-        st.markdown(f"#### {title} - {valid_time:%d.%m.%y %H:%M} UTC")
+        st.markdown(f"#### {title} - {valid_time:%d.%m.%y %H:%M} UTC ▼")
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]
@@ -721,7 +721,7 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
         # -------------------------
         # PLOT
         # -------------------------
-        st.markdown(f"#### Vítr – {t:%d.%m.%y %H:%M} UTC")
+        st.markdown(f"#### Vítr – {t:%d.%m.%y %H:%M} UTC ▼")
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
@@ -801,7 +801,7 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
         if diff_hours % 3 != 0:
             continue
 
-        st.markdown(f"#### Oblačnost – {t:%d.%m.%y %H:%M} UTC")
+        st.markdown(f"#### Oblačnost – {t:%d.%m.%y %H:%M} UTC ▼")
 
         datasets = [
             (total, cmap_total, "Celková oblačnost"),
