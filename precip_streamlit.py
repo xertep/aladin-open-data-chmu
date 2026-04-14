@@ -390,7 +390,7 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         ])
 
         ptype_labels = [
-            "mrholení / slabé",
+            "mrholení",
             "déšť",
             "sníh",
             "smíšené srážky",
@@ -430,7 +430,7 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
 
         ax.legend(
             handles=handles,
-            loc="lower left",
+            loc="upper right",
             fontsize=8,
             frameon=True
         )
