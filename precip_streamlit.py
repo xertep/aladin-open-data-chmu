@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.colors as mcolors
 import matplotlib.ticker as ticker
 import matplotlib.patheffects as pe
+import matplotlib.patches as mpatches
 import pandas as pd
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -388,19 +389,58 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
             "#b3b3b3",
         ])
 
+        ptype_labels = [
+            "mrholení / slabé",
+            "déšť",
+            "sníh",
+            "smíšené srážky",
+            "plískanice",
+            "mrznoucí déšť",
+            "kroupy",
+            "silné kroupy"
+        ]
+
+        legend_colors = [
+            "#ffffff",
+            "#4da6ff",
+            "#66ccff",
+            "#ffcc66",
+            "#ff99cc",
+            "#999999",
+            "#cccccc",
+            "#b3b3b3",
+        ]
+
+        handles = [
+            mpatches.Patch(color=legend_colors[i], label=ptype_labels[i])
+            for i in range(len(ptype_labels))
+        ]
+
         data_small.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
             cmap=cmap,
             vmin=1,
             vmax=8,
-            add_colorbar=False
+            add_colorbar=False,
+            add_labels=False
         )
 
+        ax.set_title("")
+
+        ax.legend(
+            handles=handles,
+            loc="lower left",
+            fontsize=8,
+            frameon=True
+        )
+
+        
         ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
         ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
 
         ax.set_axis_off()
+
 
         st.pyplot(fig)
 
