@@ -23,7 +23,7 @@ st.sidebar.title("Modelové vrstvy")
 
 layer = st.sidebar.radio(
     "Vyber vrstvu",
-    ["Srážky", "Typ srážek", "Teplota", "Tmin / Tmax", "Vítr", "Oblačnost"],
+    ["Srážky", "Typ srážek", "Teplota", "Tmin / Tmax", "Vítr", "Oblačnost", "Radar simulace"],
     index=0
 )
 
@@ -62,6 +62,7 @@ cloud_high_url  = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1
 
 ptype_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_PRECIP_TYPESEV.grb.bz2"
 
+maxsim_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambert_2.3km/{run}/ALADLAMB4opendata_{date}{run}_MAXSIM_REFLECTI.grb.bz2"
 
 @st.cache_data(show_spinner=True)
 def load_data(url):
@@ -168,6 +169,9 @@ if st.sidebar.button("Načíst model"):
         st.session_state["cloud_low_path"]   = load_data(cloud_low_url)
         st.session_state["cloud_mid_path"]   = load_data(cloud_mid_url)
         st.session_state["cloud_high_path"]  = load_data(cloud_high_url)
+
+    elif layer == "Radar simulace":
+        st.session_state["maxsim_path"] = load_data(maxsim_url)
 
         
 
@@ -820,4 +824,53 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
     ds_low.close()
     ds_mid.close()
     ds_high.close()
+
+
+if layer == "Radar simulace" and "maxsim_path" in st.session_state:
+
+    ds_radar = open_grib(st.session_state["maxsim_path"])
+    radar = ds_radar[list(ds_radar.data_vars)[0]]
+
+    all_times = pd.to_datetime(radar.valid_time.values)
+    run_time = pd.to_datetime(ds_radar.time.values)
+
+    for idx, t in enumerate(all_times):
+
+        diff_hours = (t - run_time).total_seconds() / 3600
+
+        # hourly steps only (safe even if already hourly)
+        if diff_hours % 1 != 0:
+            continue
+
+        data = radar.isel(step=idx)
+
+        st.markdown(f"#### Simulovaná radarová odrazivost – {t:%d.%m.%Y %H:%M} UTC")
+
+        data_small = data[::2, ::2]
+
+        fig = plt.figure(figsize=(10, 6))
+        ax = plt.axes(projection=ccrs.Mercator())
+
+        ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
+
+        data_small.plot(
+            ax=ax,
+            transform=ccrs.PlateCarree(),
+            cmap="turbo",
+            vmin=0,
+            vmax=50,
+            add_colorbar=True,
+            cbar_kwargs={
+                "label": "Simulovaná intenzita (mm/h ekv.)"
+            }
+        )
+
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+        ax.set_axis_off()
+
+        st.pyplot(fig)
+
+    ds_radar.close()
 
