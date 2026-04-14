@@ -241,12 +241,10 @@ if layer == "Srážky" and "precip_path" in st.session_state:
             end_time = all_times[idx]
             start_time = end_time - pd.Timedelta(hours=window_hours)
 
-            # 🔥 better than argmin
-            step_back = window_hours // 3
-            start_idx = idx - step_back
+            start_idx = np.argmin(np.abs(all_times - start_time))
 
-            if start_idx < 0:
-                continue
+            #if start_idx < 0:
+             #   continue
 
             data = tp.isel(step=idx) - tp.isel(step=start_idx)
 
