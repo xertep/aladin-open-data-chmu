@@ -395,43 +395,16 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         window = []
 
         for h in range(window_hours):
-
             idx_h = idx - h
             if idx_h < 0:
                 continue
 
-            raw = ptype.isel(step=idx)
-
-            st.write("RAW MIN/MAX:", float(raw.min()), float(raw.max()))
-
-            # DEBUG
-            unique_vals = np.unique((raw.values % 200).astype(int))
-            st.write(f"{t:%d.%m %H:%M} → raw types:", unique_vals)
-
+            raw = ptype.isel(step=idx_h)
             sev = to_severity(raw)
 
             window.append(sev)
 
-        if not window:
-            continue
-
-        stack = xr.concat(window, dim="t")
-
-        # most frequent value (mode)
-        def mode_func(x):
-            x = x[~np.isnan(x)]
-            if len(x) == 0:
-                return np.nan
-            return np.bincount(x.astype(int)).argmax()
-
-        ptype_final = xr.apply_ufunc(
-            mode_func,
-            stack,
-            input_core_dims=[["t"]],
-            vectorize=True,
-            dask="parallelized",
-            output_dtypes=[float],
-        )
+        ptype_final = xr.concat(window, dim="t").max(dim="t")
 
         # =====================================================
         # 5) PLOT
