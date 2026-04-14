@@ -332,15 +332,22 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
 
     window_hours = 3
 
-    for idx, t in enumerate(all_times):
+    target_indices = []
+
+    for i, t in enumerate(all_times):
 
         diff_hours = (t - run_time).total_seconds() / 3600
 
-        if diff_hours % 1 != 0:
-            continue
+        # only every 3 hours
+        if diff_hours % 3 == 0:
+            target_indices.append(i)
+
+    for idx in target_indices:
+
+        t = all_times[idx]
 
         # -----------------------------------
-        # TAKE LAST N HOURS
+        # TAKE LAST 3 HOURS
         # -----------------------------------
         window_sev = []
 
@@ -356,7 +363,6 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         if not window_sev:
             continue
 
-        # MAX = most dangerous type in window
         ptype_final = xr.concat(window_sev, dim="t").max(dim="t")
 
         # -----------------------------------
@@ -372,14 +378,14 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
         cmap = mcolors.ListedColormap([
-            "#ffffff",  # 1 drizzle
-            "#4da6ff",  # 2 rain
-            "#66ccff",  # 3 snow
-            "#ffcc66",  # 4 mix
-            "#ff99cc",  # 5 slush
-            "#999999",  # 6 freezing rain
-            "#cccccc",  # 7 hail
-            "#b3b3b3",  # 8 hail strong
+            "#ffffff",
+            "#4da6ff",
+            "#66ccff",
+            "#ffcc66",
+            "#ff99cc",
+            "#999999",
+            "#cccccc",
+            "#b3b3b3",
         ])
 
         data_small.plot(
