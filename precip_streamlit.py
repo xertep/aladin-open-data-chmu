@@ -22,7 +22,7 @@ st.sidebar.title("Modelové vrstvy")
 
 layer = st.sidebar.radio(
     "Vyber vrstvu",
-    ["Srážky", "Teplota", "Tmin / Tmax", "Vítr", "Oblačnost"],
+    ["Srážky", "Typ srážek", "Teplota", "Tmin / Tmax", "Vítr", "Oblačnost"],
     index=0
 )
 
@@ -58,6 +58,9 @@ cloud_total_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1
 cloud_low_url   = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFNEBUL_BASSE.grb.bz2"
 cloud_mid_url   = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFNEBUL_MOYENN.grb.bz2"
 cloud_high_url  = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFNEBUL_HAUTE.grb.bz2"
+
+ptype_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_PRECIP_TYPESEV.grb.bz2"
+
 
 @st.cache_data(show_spinner=True)
 def load_data(url):
@@ -142,6 +145,9 @@ if st.sidebar.button("Načíst model"):
     if layer == "Srážky":
         st.session_state["precip_path"] = load_data(url)
 
+    elif layer == "Typ srážek":
+        st.session_state["ptype_path"] = load_data(ptype_url)
+
     elif layer == "Teplota":
         st.session_state["temp_path"] = load_data(temp_url)
 
@@ -159,6 +165,7 @@ if st.sidebar.button("Načíst model"):
         st.session_state["cloud_low_path"]   = load_data(cloud_low_url)
         st.session_state["cloud_mid_path"]   = load_data(cloud_mid_url)
         st.session_state["cloud_high_path"]  = load_data(cloud_high_url)
+
         
 
 if layer == "Srážky" and "precip_path" in st.session_state:
@@ -287,6 +294,71 @@ if layer == "Srážky" and "precip_path" in st.session_state:
 
     ds.close()
     del ds, tp
+
+
+if layer == "Typ srážek" and "ptype_path" in st.session_state:
+
+    ds_ptype = open_grib(st.session_state["ptype_path"])
+    ptype = ds_ptype[list(ds_ptype.data_vars)[0]]
+
+    all_times = pd.to_datetime(ptype.valid_time.values)
+    run_time = pd.to_datetime(ds_ptype.time.values)
+
+    for idx, t in enumerate(all_times):
+
+        diff_hours = (t - run_time).total_seconds() / 3600
+
+        if diff_hours % 1 != 0:   # hourly field
+            continue
+
+        data = ptype.isel(step=idx)
+
+        # remove "občasné/trvalé" encoding if needed
+        data = xr.where(data >= 200, data - 200, data)
+
+        st.markdown(f"## Typ srážek – {t:%d.%m.%y %H:%M} UTC")
+
+        data_small = data[::2, ::2]
+
+        # categorical colormap
+        colors = {
+            1: "#4da6ff",   # rain
+            5: "#ffffff",   # snow
+            6: "#cce6ff",   # wet snow
+            7: "#ffcc66",   # mix
+            8: "#999999",   # freezing rain
+            9: "#cccccc",   # small hail
+            10: "#b3b3b3",  # hail
+            11: "#66ccff",  # drizzle
+            12: "#66ffff",  # freezing drizzle
+            3: "#ff3333",   # strong freezing rain
+            193: "#ff99cc"  # slush
+        }
+
+        cmap = mcolors.ListedColormap(list(colors.values()))
+        norm = mcolors.BoundaryNorm(list(colors.keys()), cmap.N)
+
+        fig = plt.figure(figsize=(10, 6))
+        ax = plt.axes(projection=ccrs.Mercator())
+
+        ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
+
+        data_small.plot(
+            ax=ax,
+            transform=ccrs.PlateCarree(),
+            cmap=cmap,
+            norm=norm,
+            add_colorbar=False
+        )
+
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+        ax.set_axis_off()
+
+        st.pyplot(fig)
+
+    ds_ptype.close()
 
 
 
