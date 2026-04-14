@@ -344,7 +344,10 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         lut[k] = v
 
     def to_severity(da):
-        da = (da % 200).astype(int)
+        da = xr.where(da >= 200, da - 200, da)
+
+        da = np.rint(da).astype(int)
+
         return xr.DataArray(
             lut[da],
             dims=da.dims,
@@ -398,6 +401,8 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
                 continue
 
             raw = ptype.isel(step=idx)
+
+            st.write("RAW MIN/MAX:", float(raw.min()), float(raw.max()))
 
             # DEBUG
             unique_vals = np.unique((raw.values % 200).astype(int))
