@@ -26,6 +26,16 @@ layer = st.sidebar.radio(
     index=0
 )
 
+if layer == "Srážky":
+    options = {
+        "3 h": 3,
+        "24 h": 24,
+        "72 h": 72
+    }
+
+    label = st.sidebar.selectbox("Suma srážek", options.keys())
+    window_hours = options[label]
+
 # ---- USER INPUT ----
 date = st.text_input("Datum (YYYYMMDD)", datetime.today().strftime('%Y%m%d'))
 run = st.selectbox("Běh modelu (UTC)", ["00", "06", "12", "18"])
@@ -83,12 +93,13 @@ colors = [
     "#ff5900", # Dark Red (40.0 - 60.0)
     "#ff0000", # White (60.0 - 80.0)
     "#a20000", # White (80.0 - 100.0)
-    "#ffffff", # White (100.0 - 150.0)
-    "#960096"  # Dark Pink (> 150.0)
+    "#ffffff" # White (100.0 - 150.0)
 ]
 
 # 3. Create the Colormap and the Normalization object
 custom_cmap = mcolors.ListedColormap(colors)
+custom_cmap.set_over("#960096")  # >150 mm
+
 norm = mcolors.BoundaryNorm(boundaries, custom_cmap.N)
 
 # 1. Define a custom formatting function
@@ -166,32 +177,26 @@ if layer == "Srážky" and "precip_path" in st.session_state:
     # Model run time
     run_time = pd.to_datetime(ds.time.values)
 
-    # ---- FIND 3H WINDOWS ----
-    target_indices = []
+    # ---- HANDLE 72h (SPECIAL CASE) ----
+    if window_hours == 72:
 
-    for i, t in enumerate(all_times):
-        diff_hours = (t - run_time).total_seconds() / 3600
+        start_idx = 0
+        end_idx = len(all_times) - 1
 
-        # keep only 3h steps (3, 6, 9, ...)
-        if diff_hours > 0 and diff_hours % 3 == 0:
-            target_indices.append(i)
+        start_time = all_times[start_idx]
+        end_time = all_times[end_idx]
 
-    # ---- LOOP THROUGH WINDOWS ----
-    for idx in target_indices:
-        end_time = all_times[idx]
-        start_time = end_time - pd.Timedelta(hours=3)
-
-        start_idx = np.argmin(np.abs(all_times - start_time))
-
-        data = tp.isel(step=idx) - tp.isel(step=start_idx)
+        data = tp.isel(step=end_idx) - tp.isel(step=start_idx)
 
         data = data.clip(min=0)
         data = data.where(data >= 0.1)
 
-        st.markdown(f"## Srážky {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC")
+        st.markdown(
+            f"## Srážky {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC (72h)"
+        )
+
         data_small = data[::2, ::2]
 
-        # ---- MAP ----
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
 
@@ -200,16 +205,16 @@ if layer == "Srážky" and "precip_path" in st.session_state:
         data_small.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
-            cmap=custom_cmap,       # Use our new cmap
-            norm=norm,              # Use the boundary norm instead of vmin/vmax
+            cmap=custom_cmap,
+            norm=norm,
             add_colorbar=True,
             add_labels=False,
             cbar_kwargs={
-                "label": "Srážky (mm / 3h)",
+                "label": "Srážky (mm / 72h)",
                 "boundaries": boundaries,
-                "ticks": [0.1, 0.3, 0.5, 1, 2, 4, 6, 10, 15, 20, 30, 40, 60, 80, 100, 150],
-                # 2. Apply the custom formatter to the colorbar axis
-                "format": ticker.FuncFormatter(weather_formatter) 
+                "ticks": boundaries,
+                "format": ticker.FuncFormatter(weather_formatter),
+                "extend": "max"
             }
         )
 
@@ -218,7 +223,69 @@ if layer == "Srážky" and "precip_path" in st.session_state:
 
         ax.set_axis_off()
 
-        st.pyplot(fig, use_container_width=False)
+        st.pyplot(fig)
+
+    # ---- 3h and 24h (LOOP) ----
+    else:
+
+        target_indices = []
+
+        for i, t in enumerate(all_times):
+            diff_hours = (t - run_time).total_seconds() / 3600
+
+            if diff_hours >= window_hours and diff_hours % 3 == 0:
+                target_indices.append(i)
+
+        for idx in target_indices:
+
+            end_time = all_times[idx]
+            start_time = end_time - pd.Timedelta(hours=window_hours)
+
+            # 🔥 better than argmin
+            step_back = window_hours // 3
+            start_idx = idx - step_back
+
+            if start_idx < 0:
+                continue
+
+            data = tp.isel(step=idx) - tp.isel(step=start_idx)
+
+            data = data.clip(min=0)
+            data = data.where(data >= 0.1)
+
+            st.markdown(
+                f"## Srážky {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC ({window_hours}h)"
+            )
+
+            data_small = data[::2, ::2]
+
+            fig = plt.figure(figsize=(10, 6))
+            ax = plt.axes(projection=ccrs.Mercator())
+
+            ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
+
+            data_small.plot(
+                ax=ax,
+                transform=ccrs.PlateCarree(),
+                cmap=custom_cmap,
+                norm=norm,
+                add_colorbar=True,
+                add_labels=False,
+                cbar_kwargs={
+                    "label": f"Srážky (mm / {window_hours}h)",
+                    "boundaries": boundaries,
+                    "ticks": boundaries,
+                    "format": ticker.FuncFormatter(weather_formatter),
+                    "extend": "max"
+                }
+            )
+
+            ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+            ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+            ax.set_axis_off()
+
+            st.pyplot(fig)
 
     ds.close()
     del ds, tp
