@@ -93,12 +93,13 @@ colors = [
     "#ff5900", # Dark Red (40.0 - 60.0)
     "#ff0000", # White (60.0 - 80.0)
     "#a20000", # White (80.0 - 100.0)
-    "#ffffff", # White (100.0 - 150.0)
-    "#960096"  # Dark Pink (> 150.0)
+    "#ffffff" # White (100.0 - 150.0)
 ]
 
 # 3. Create the Colormap and the Normalization object
 custom_cmap = mcolors.ListedColormap(colors)
+custom_cmap.set_over("#960096")  # >150 mm
+
 norm = mcolors.BoundaryNorm(boundaries, custom_cmap.N)
 
 # 1. Define a custom formatting function
@@ -212,7 +213,8 @@ if layer == "Srážky" and "precip_path" in st.session_state:
                 "label": "Srážky (mm / 72h)",
                 "boundaries": boundaries,
                 "ticks": boundaries,
-                "format": ticker.FuncFormatter(weather_formatter)
+                "format": ticker.FuncFormatter(weather_formatter),
+                "extend": "max"
             }
         )
 
@@ -273,7 +275,8 @@ if layer == "Srážky" and "precip_path" in st.session_state:
                     "label": f"Srážky (mm / {window_hours}h)",
                     "boundaries": boundaries,
                     "ticks": boundaries,
-                    "format": ticker.FuncFormatter(weather_formatter)
+                    "format": ticker.FuncFormatter(weather_formatter),
+                    "extend": "max"
                 }
             )
 
