@@ -840,17 +840,16 @@ if layer == "Radar simulace" and "maxsim_path" in st.session_state:
         if diff_hours % 1 != 0:
             continue
 
-        data = radar.sel(valid_time=t, method="nearest")
-
-        st.markdown(f"#### Simulovaná radarová odrazivost – {t:%d.%m.%Y %H:%M} UTC")
-
-        st.write("MIN/MAX:", float(data.min()), float(data.max()))
+        data = radar.isel(step=idx)
 
         if np.all(np.isnan(data)):
-            st.warning("No data for this time")
             continue
 
-        data_small = data[::2, ::2]
+        vmax = np.nanpercentile(data.values, 99)
+
+        st.markdown(f"#### Radar – {t:%d.%m.%Y %H:%M} UTC")
+
+        data_small = data.coarsen(latitude=2, longitude=2, boundary="trim").mean()
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
@@ -862,17 +861,15 @@ if layer == "Radar simulace" and "maxsim_path" in st.session_state:
             transform=ccrs.PlateCarree(),
             cmap="turbo",
             vmin=0,
-            vmax=50,
-            add_colorbar=True,
-            cbar_kwargs={"label": "mm/h ekv."}
+            vmax=vmax,
+            add_colorbar=True
         )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta")
-        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta")
+        ax.add_feature(cfeature.BORDERS)
+        ax.add_feature(cfeature.COASTLINE)
 
         ax.set_axis_off()
 
         st.pyplot(fig)
-
     ds_radar.close()
 
