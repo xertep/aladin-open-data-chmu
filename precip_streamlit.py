@@ -379,7 +379,7 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
     colors = [
         "#3aff3a",  # 1 mrholení
         "#00cc00",  # 2 déšť
-        "#00cc00",  # 3 smíšené
+        "#009a80",  # 3 smíšené
         "#800080",  # 4 zmrzlý déšť
         "#ffff00",  # 5 krupička
         "#456cff",  # 6 suchý sníh
