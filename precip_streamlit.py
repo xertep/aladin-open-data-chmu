@@ -383,19 +383,19 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         if diff_hours % 3 == 0:
             valid_indices.append(i)
 
-    # loop ONLY over valid timeline
-    for pos, idx in enumerate(valid_indices):
+    for idx, t in enumerate(all_times):
 
-        t = all_times[idx]
+        diff_hours = (t - run_time).total_seconds() / 3600
+        if diff_hours % 3 != 0:
+            continue
 
         window = []
 
         for h in range(window_hours):
 
-            if pos - h < 0:
+            idx_h = idx - h
+            if idx_h < 0:
                 continue
-
-            idx_h = valid_indices[pos - h]
 
             raw = ptype.isel(step=idx_h)
             sev = to_severity(raw)
