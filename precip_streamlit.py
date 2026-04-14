@@ -328,29 +328,80 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
     ptype = ds_ptype[list(ds_ptype.data_vars)[0]]
 
     all_times = pd.to_datetime(ptype.valid_time.values)
-
     run_time = pd.to_datetime(ds_ptype.time.values)
 
     window_hours = 3
 
-    target_indices = []
+    # =========================================================
+    # 1) STRICT SEVERITY MAP (YOUR TABLE - NO CHANGES)
+    # =========================================================
+    ptype_severity = {
+        11: 1,        # mrholení
+        1: 2, 201: 2, # déšť
 
-    for i, t in enumerate(all_times):
+        7: 3, 207: 3, # smíšené srážky
+
+        8: 4,        # zmrzlý déšť
+
+        9: 5,        # krupička, malé kroupy
+
+        5: 6, 205: 6, # suchý sníh
+
+        6: 7, 206: 7, # mokrý sníh
+
+        193: 8, 213: 8, # plískanice
+
+        10: 9,       # kroupy
+
+        12: 10,      # mrznoucí mrholení
+
+        3: 11        # mrznoucí déšť (most dangerous)
+    }
+
+    # =========================================================
+    # 2) FAST VECTOR LOOKUP (LUT)
+    # =========================================================
+    lut = np.full(300, np.nan)
+    for k, v in ptype_severity.items():
+        lut[k] = v
+
+    def to_severity(da):
+        da = (da % 200).astype(int)
+        return xr.DataArray(
+            lut[da],
+            dims=da.dims,
+            coords=da.coords
+        )
+
+    # =========================================================
+    # 3) COLORS (LOW → HIGH SEVERITY GRADIENT)
+    # =========================================================
+    colors = [
+        "#3aff3a",  # 1 mrholení
+        "#00cc00",  # 2 déšť
+        "#00cc00",  # 3 smíšené
+        "#800080",  # 4 zmrzlý déšť
+        "#ffff00",  # 5 krupička
+        "#456cff",  # 6 suchý sníh
+        "#0000e5",  # 7 mokrý sníh
+        "#000080",  # 8 plískanice
+        "#ffc000",  # 9 kroupy
+        "#ff4040",  # 10 mrznoucí mrholení
+        "#ff4040"   # 11 mrznoucí déšť
+    ]
+
+    cmap = mcolors.ListedColormap(colors)
+
+    # =========================================================
+    # 4) LOOP (3H MAX WINDOW)
+    # =========================================================
+    for idx, t in enumerate(all_times):
 
         diff_hours = (t - run_time).total_seconds() / 3600
+        if diff_hours % 3 != 0:
+            continue
 
-        # only every 3 hours
-        if diff_hours % 3 == 0:
-            target_indices.append(i)
-
-    for idx in target_indices:
-
-        t = all_times[idx]
-
-        # -----------------------------------
-        # TAKE LAST 3 HOURS
-        # -----------------------------------
-        window_sev = []
+        window = []
 
         for h in range(window_hours):
             idx_h = idx - h
@@ -359,88 +410,70 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
 
             raw = ptype.isel(step=idx_h)
             sev = to_severity(raw)
-            window_sev.append(sev)
+            window.append(sev)
 
-        if not window_sev:
+        if not window:
             continue
 
-        ptype_final = xr.concat(window_sev, dim="t").max(dim="t")
+        # max severity in last 3 hours
+        ptype_final = xr.concat(window, dim="t").max(dim="t")
 
-        # -----------------------------------
-        # PLOT
-        # -----------------------------------
-        st.markdown(f"## Typ srážek – {t:%d.%m.%Y %H:%M} UTC ({window_hours}h max severity)")
-
-        data_small = ptype_final[::2, ::2]
-
+        # =====================================================
+        # 5) PLOT
+        # =====================================================
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
-
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
-        cmap = mcolors.ListedColormap([
-            "#ffffff",
-            "#4da6ff",
-            "#66ccff",
-            "#ffcc66",
-            "#ff99cc",
-            "#999999",
-            "#cccccc",
-            "#b3b3b3",
-        ])
+        ptype_plot = ptype_final[::2, ::2]
 
-        ptype_labels = [
-            "mrholení",
-            "déšť",
-            "sníh",
-            "smíšené srážky",
-            "plískanice",
-            "mrznoucí déšť",
-            "kroupy",
-            "silné kroupy"
-        ]
-
-        legend_colors = [
-            "#ffffff",
-            "#4da6ff",
-            "#66ccff",
-            "#ffcc66",
-            "#ff99cc",
-            "#999999",
-            "#cccccc",
-            "#b3b3b3",
-        ]
-
-        handles = [
-            mpatches.Patch(color=legend_colors[i], label=ptype_labels[i])
-            for i in range(len(ptype_labels))
-        ]
-
-        data_small.plot(
+        ptype_plot.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
             cmap=cmap,
             vmin=1,
-            vmax=8,
-            add_colorbar=False,
-            add_labels=False
+            vmax=11,
+            add_colorbar=False
         )
 
         ax.set_title("")
+        ax.add_feature(cfeature.BORDERS, edgecolor="black")
+        ax.add_feature(cfeature.COASTLINE, edgecolor="black")
+        ax.set_axis_off()
+
+        # =====================================================
+        # 6) LEGEND (STRICT ORDER 1 → 11)
+        # =====================================================
+        labels = {
+            1: "mrholení",
+            2: "déšť",
+            3: "smíšené srážky",
+            4: "zmrzlý déšť",
+            5: "malé kroupy",
+            6: "suchý sníh",
+            7: "mokrý sníh",
+            8: "mokrý sníh s deštěm",
+            9: "kroupy",
+            10: "mrznoucí mrholení",
+            11: "mrznoucí déšť"
+        }
+
+        import matplotlib.patches as mpatches
+
+        patches = [
+            mpatches.Patch(
+                color=colors[i - 1],
+                label=f"{i} - {labels[i]}"
+            )
+            for i in range(1, 12)
+        ]
 
         ax.legend(
-            handles=handles,
-            loc="upper right",
+            handles=patches,
+            loc="lower left",
             fontsize=8,
             frameon=True
         )
-
-        
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
-        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
-
-        ax.set_axis_off()
-
 
         st.pyplot(fig)
 
