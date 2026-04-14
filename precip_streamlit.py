@@ -136,29 +136,6 @@ cmap_high = mcolors.LinearSegmentedColormap.from_list(
 )
 
 
-ptype_map = {
-    11: 1,   # drizzle
-    1: 2,    # rain
-    5: 3,    # snow
-    6: 3,
-    7: 4,    # mix
-    193: 5,  # slush
-    8: 6,
-    3: 6,
-    9: 7,
-    10: 8,
-    12: 1
-}
-
-def to_severity(da):
-    da = xr.where(da >= 200, da - 200, da)
-
-    out = xr.full_like(da, np.nan)
-
-    for k, v in ptype_map.items():
-        out = out.where(da != k, v)
-
-    return out
 
 
 @st.cache_data
@@ -395,6 +372,7 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
     # =========================================================
     # 4) LOOP (3H MAX WINDOW)
     # =========================================================
+    # use valid_time as reference (IMPORTANT FIX)
     for idx, t in enumerate(all_times):
 
         diff_hours = (t - run_time).total_seconds() / 3600
@@ -404,18 +382,20 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         window = []
 
         for h in range(window_hours):
-            idx_h = idx - h
-            if idx_h < 0:
-                continue
 
-            raw = ptype.isel(step=idx_h)
+            target_time = t - pd.Timedelta(hours=h)
+
+            # find closest matching step by valid_time (CRITICAL FIX)
+            step_idx = np.argmin(np.abs(all_times - target_time))
+
+            raw = ptype.isel(step=step_idx)
             sev = to_severity(raw)
+
             window.append(sev)
 
         if not window:
             continue
 
-        # max severity in last 3 hours
         ptype_final = xr.concat(window, dim="t").max(dim="t")
 
         # =====================================================
