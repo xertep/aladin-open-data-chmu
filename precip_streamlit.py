@@ -19,6 +19,11 @@ st.set_page_config(
     page_icon="🌧️"                     # optional: emoji or path to an image
 )
 
+st.markdown("### Model ALADIN (z open dat ČHMÚ)")
+st.markdown(
+    "Vizualizace výstupů numerického modelu ALADIN ve formě statických map"
+)
+
 st.sidebar.title("Modelové vrstvy")
 
 layer = st.sidebar.radio(
