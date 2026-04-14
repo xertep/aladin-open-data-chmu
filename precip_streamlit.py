@@ -19,6 +19,10 @@ st.set_page_config(
     page_icon="🌧️"                     # optional: emoji or path to an image
 )
 
+if "seen_hint" not in st.session_state:
+    st.info("Tip: menu (») pro výběr vrstev je vlevo nahoře.")
+    st.session_state["seen_hint"] = True
+
 st.markdown("### Model ALADIN (z open dat ČHMÚ)")
 st.markdown(
     "Vizualizace výstupů numerického modelu ALADIN ve formě statických map"
