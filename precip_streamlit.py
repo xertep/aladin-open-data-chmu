@@ -262,7 +262,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
             data = data.where(data >= 0.1)
 
             st.markdown(
-                f"## Srážky {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC ({window_hours}h)"
+                f"#### Srážky {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC ({window_hours}h)"
             )
 
             data_small = data[::2, ::2]
@@ -498,7 +498,7 @@ if layer == "Teplota" and "temp_path" in st.session_state:
         # Kelvin -> Celsius
         data = temp.isel(step=idx) - 273.15
 
-        st.markdown(f"## Teplota - {t:%d.%m.%y %H:%M} UTC")
+        st.markdown(f"#### Teplota - {t:%d.%m.%y %H:%M} UTC")
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]   # controls density (bigger = fewer labels)
