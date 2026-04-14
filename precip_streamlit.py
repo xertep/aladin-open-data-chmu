@@ -12,7 +12,7 @@ import matplotlib.patches as mpatches
 import pandas as pd
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-from datetime import datetime
+from datetime import datetime, timedelta
 
 st.set_page_config(
     page_title="Aladin (open data ČHMÚ)",  # this changes the browser tab title
@@ -38,8 +38,23 @@ if layer == "Srážky":
     window_hours = options[label]
 
 # ---- USER INPUT ----
-date = st.text_input("Datum (YYYYMMDD)", datetime.today().strftime('%Y%m%d'))
+# ---- DATE OPTIONS (today + 2 previous days) ----
+today = datetime.today()
+
+date_map = {
+    (today - timedelta(days=2)).strftime('%Y%m%d'): (today - timedelta(days=2)).strftime('%d. %m. %Y'),
+    (today - timedelta(days=1)).strftime('%Y%m%d'): (today - timedelta(days=1)).strftime('%d. %m. %Y'),
+    today.strftime('%Y%m%d'): today.strftime('%d. %m. %Y'),
+}
+
+date = st.selectbox(
+    "Datum",
+    options=list(date_map.keys()),
+    format_func=lambda x: date_map[x]
+)
+
 run = st.selectbox("Běh modelu (UTC)", ["00", "06", "12", "18"])
+
 
 url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFPREC_TOTAL.grb.bz2"
 
@@ -61,6 +76,16 @@ cloud_mid_url   = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1
 cloud_high_url  = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFNEBUL_HAUTE.grb.bz2"
 
 ptype_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_PRECIP_TYPESEV.grb.bz2"
+
+
+def safe_load(url, label="Data"):
+    with st.spinner(f"Načítám {label}..."):
+        try:
+            path = load_data(url)
+            return path
+        except Exception:
+            st.error("Data pro vybraný termín nejsou dostupná.")
+            st.stop()
 
 
 @st.cache_data(show_spinner=True)
@@ -146,28 +171,28 @@ def open_grib(path):
 if st.sidebar.button("Načíst model"):
 
     if layer == "Srážky":
-        st.session_state["precip_path"] = load_data(url)
+        st.session_state["precip_path"] = safe_load(url, "Srážky")
 
     elif layer == "Typ srážek":
-        st.session_state["ptype_path"] = load_data(ptype_url)
+        st.session_state["ptype_path"] = safe_load(ptype_url, "Typ srážek")
 
     elif layer == "Teplota":
-        st.session_state["temp_path"] = load_data(temp_url)
+        st.session_state["temp_path"] = safe_load(temp_url, "Teplota")
 
     elif layer == "Tmin / Tmax":
-        st.session_state["tmax_path"] = load_data(tmax_url)
-        st.session_state["tmin_path"] = load_data(tmin_url)
+        st.session_state["tmax_path"] = safe_load(tmax_url, "Tmin / Tmax")
+        st.session_state["tmin_path"] = safe_load(tmin_url, "Tmin / Tmax")
 
     elif layer == "Vítr":
-        st.session_state["wind_speed_path"] = load_data(wind_speed_url)
-        st.session_state["wind_dir_path"] = load_data(wind_dir_url)
-        st.session_state["gust_u_path"] = load_data(gust_u_url)
+        st.session_state["wind_speed_path"] = safe_load(wind_speed_url, "Vítr")
+        st.session_state["wind_dir_path"] = safe_load(wind_dir_url, "Vítr")
+        st.session_state["gust_u_path"] = safe_load(gust_u_url, "Vítr")
 
     elif layer == "Oblačnost":
-        st.session_state["cloud_total_path"] = load_data(cloud_total_url)
-        st.session_state["cloud_low_path"]   = load_data(cloud_low_url)
-        st.session_state["cloud_mid_path"]   = load_data(cloud_mid_url)
-        st.session_state["cloud_high_path"]  = load_data(cloud_high_url)
+        st.session_state["cloud_total_path"] = safe_load(cloud_total_url, "Oblačnost")
+        st.session_state["cloud_low_path"]   = safe_load(cloud_low_url, "Oblačnost")
+        st.session_state["cloud_mid_path"]   = safe_load(cloud_mid_url, "Oblačnost")
+        st.session_state["cloud_high_path"]  = safe_load(cloud_high_url, "Oblačnost")
 
         
 
