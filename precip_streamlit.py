@@ -59,8 +59,6 @@ cloud_low_url   = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1
 cloud_mid_url   = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFNEBUL_MOYENN.grb.bz2"
 cloud_high_url  = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFNEBUL_HAUTE.grb.bz2"
 
-ptype_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_PRECIP_TYPESEV.grb.bz2"
-
 @st.cache_data(show_spinner=True)
 def load_data(url):
     r = requests.get(url)
@@ -134,24 +132,6 @@ cmap_high = mcolors.LinearSegmentedColormap.from_list(
 )
 
 
-
-ptype_colors = {
-    1: "#4da6ff",
-    5: "#ffffff",
-    6: "#cce6ff",
-    7: "#ffcc66",
-    8: "#999999",
-    9: "#cccccc",
-    10: "#b3b3b3",
-    11: "#66ccff",
-    12: "#66ffff",
-    3: "#ff3333",
-    193: "#ff99cc"
-}
-
-ptype_cmap = mcolors.ListedColormap([ptype_colors[k] for k in sorted(ptype_colors)])
-
-
 @st.cache_data
 def open_grib(path):
     return xr.open_dataset(path, engine="cfgrib")
@@ -161,8 +141,6 @@ if st.sidebar.button("Načíst model"):
 
     if layer == "Srážky":
         st.session_state["precip_path"] = load_data(url)
-        st.session_state["ptype_path"] = load_data(ptype_url)
-        st.session_state["loaded_precip"] = True
 
     elif layer == "Teplota":
         st.session_state["temp_path"] = load_data(temp_url)
@@ -183,7 +161,7 @@ if st.sidebar.button("Načíst model"):
         st.session_state["cloud_high_path"]  = load_data(cloud_high_url)
         
 
-if layer == "Srážky" and st.session_state.get("loaded_precip"):
+if layer == "Srážky" and "precip_path" in st.session_state:
     path = st.session_state["precip_path"]
 
     ds = open_grib(path)
@@ -191,10 +169,6 @@ if layer == "Srážky" and st.session_state.get("loaded_precip"):
     st.write("Data načtena")
 
     tp = ds[list(ds.data_vars)[0]]
-
-
-    ds_ptype = open_grib(st.session_state["ptype_path"])
-    ptype = ds_ptype[list(ds_ptype.data_vars)[0]]
 
 
     # All valid times
@@ -274,20 +248,6 @@ if layer == "Srážky" and st.session_state.get("loaded_precip"):
 
             data = tp.isel(step=idx) - tp.isel(step=start_idx)
 
-            ptype_window = []
-
-            for h in range(window_hours):
-                t_target = end_time - pd.Timedelta(hours=h)
-
-                idx_h = np.argmin(np.abs(all_times - t_target))
-
-                val = ptype.isel(step=idx_h)
-                val = xr.where(val >= 200, val - 200, val)
-
-                ptype_window.append(val)
-
-            ptype_now = xr.concat(ptype_window, dim="t").max(dim="t")
-
             data = data.clip(min=0)
             data = data.where(data >= 0.1)
 
@@ -296,8 +256,6 @@ if layer == "Srážky" and st.session_state.get("loaded_precip"):
             )
 
             data_small = data[::2, ::2]
-
-            ptype_small = ptype_now[::2, ::2]
 
             fig = plt.figure(figsize=(10, 6))
             ax = plt.axes(projection=ccrs.Mercator())
@@ -320,16 +278,6 @@ if layer == "Srážky" and st.session_state.get("loaded_precip"):
                 }
             )
 
-
-
-            ptype_small.plot(
-                ax=ax,
-                transform=ccrs.PlateCarree(),
-                cmap=ptype_cmap,
-                add_colorbar=False,
-                alpha=0.35
-            )
-
             ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
             ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
 
@@ -339,8 +287,6 @@ if layer == "Srážky" and st.session_state.get("loaded_precip"):
 
     ds.close()
     del ds, tp
-    ds_ptype.close()
-    del ds_ptype, ptype
 
 
 
