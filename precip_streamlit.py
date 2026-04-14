@@ -26,9 +26,9 @@ if "seen_hint" not in st.session_state:
     )
     st.session_state["seen_hint"] = True
 
-st.markdown("### Model ALADIN (z open dat ČHMÚ)")
+st.markdown("### Model ALADIN")
 st.markdown(
-    "Vizualizace výstupů numerického modelu ALADIN ve formě statických map"
+    "Vizualizace výstupů numerického modelu ALADIN ve formě statických map s využitím open dat ČHMÚ"
 )
 
 st.sidebar.title("Modelové vrstvy")
