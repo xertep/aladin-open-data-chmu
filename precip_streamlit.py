@@ -837,14 +837,18 @@ if layer == "Radar simulace" and "maxsim_path" in st.session_state:
     for idx, t in enumerate(all_times):
 
         diff_hours = (t - run_time).total_seconds() / 3600
-
-        # hourly steps only (safe even if already hourly)
         if diff_hours % 1 != 0:
             continue
 
-        data = radar.isel(step=idx)
+        data = radar.sel(valid_time=t, method="nearest")
 
         st.markdown(f"#### Simulovaná radarová odrazivost – {t:%d.%m.%Y %H:%M} UTC")
+
+        st.write("MIN/MAX:", float(data.min()), float(data.max()))
+
+        if np.all(np.isnan(data)):
+            st.warning("No data for this time")
+            continue
 
         data_small = data[::2, ::2]
 
@@ -860,13 +864,11 @@ if layer == "Radar simulace" and "maxsim_path" in st.session_state:
             vmin=0,
             vmax=50,
             add_colorbar=True,
-            cbar_kwargs={
-                "label": "Simulovaná intenzita (mm/h ekv.)"
-            }
+            cbar_kwargs={"label": "mm/h ekv."}
         )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
-        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta")
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta")
 
         ax.set_axis_off()
 
