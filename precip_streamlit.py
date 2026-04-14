@@ -20,7 +20,10 @@ st.set_page_config(
 )
 
 if "seen_hint" not in st.session_state:
-    st.info("Tip: menu (») pro výběr vrstev je vlevo nahoře.")
+    st.markdown(
+        "<span style='font-size:28px;'>»</span> menu pro výběr vrstev je vlevo nahoře",
+        unsafe_allow_html=True
+    )
     st.session_state["seen_hint"] = True
 
 st.markdown("### Model ALADIN (z open dat ČHMÚ)")
