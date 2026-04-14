@@ -59,7 +59,7 @@ cloud_low_url   = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1
 cloud_mid_url   = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFNEBUL_MOYENN.grb.bz2"
 cloud_high_url  = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFNEBUL_HAUTE.grb.bz2"
 
-ptype_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_PRECIP_TYPESEV.grb.bz2"
+ptype_url = "https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_PRECIP_TYPESEV.grb.bz2"
 
 @st.cache_data(show_spinner=True)
 def load_data(url):
@@ -162,6 +162,7 @@ if st.sidebar.button("Načíst model"):
     if layer == "Srážky":
         st.session_state["precip_path"] = load_data(url)
         st.session_state["ptype_path"] = load_data(ptype_url)
+        st.session_state["loaded_precip"] = True
 
     elif layer == "Teplota":
         st.session_state["temp_path"] = load_data(temp_url)
@@ -182,7 +183,7 @@ if st.sidebar.button("Načíst model"):
         st.session_state["cloud_high_path"]  = load_data(cloud_high_url)
         
 
-if layer == "Srážky" and "precip_path" in st.session_state:
+if layer == "Srážky" and st.session_state.get("loaded_precip"):
     path = st.session_state["precip_path"]
 
     ds = open_grib(path)
@@ -276,9 +277,9 @@ if layer == "Srážky" and "precip_path" in st.session_state:
             ptype_window = []
 
             for h in range(window_hours):
-                idx_h = idx - h
-                if idx_h < 0:
-                    continue
+                t_target = end_time - pd.Timedelta(hours=h)
+
+                idx_h = np.argmin(np.abs(all_times - t_target))
 
                 val = ptype.isel(step=idx_h)
                 val = xr.where(val >= 200, val - 200, val)
@@ -326,7 +327,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
                 transform=ccrs.PlateCarree(),
                 cmap=ptype_cmap,
                 add_colorbar=False,
-                alpha=1.0
+                alpha=0.35
             )
 
             ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
@@ -338,6 +339,8 @@ if layer == "Srážky" and "precip_path" in st.session_state:
 
     ds.close()
     del ds, tp
+    ds_ptype.close()
+    del ds_ptype, ptype
 
 
 
