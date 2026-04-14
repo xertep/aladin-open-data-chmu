@@ -27,16 +27,14 @@ layer = st.sidebar.radio(
 )
 
 if layer == "Srážky":
-    precip_sum = st.sidebar.selectbox(
-        "Suma srážek",
-        {
-            "3 h": 3,
-            "24 h": 24,
-            "72 h": 72
-        }
-    )
+    options = {
+        "3 h": 3,
+        "24 h": 24,
+        "72 h": 72
+    }
 
-    window_hours = precip_sum
+    label = st.sidebar.selectbox("Suma srážek", options.keys())
+    window_hours = options[label]
 
 # ---- USER INPUT ----
 date = st.text_input("Datum (YYYYMMDD)", datetime.today().strftime('%Y%m%d'))
