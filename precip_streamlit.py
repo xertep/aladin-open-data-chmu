@@ -42,9 +42,9 @@ if layer == "Srážky":
 today = datetime.today()
 
 date_map = {
-    (today - timedelta(days=2)).strftime('%Y%m%d'): (today - timedelta(days=2)).strftime('%d. %m. %Y'),
-    (today - timedelta(days=1)).strftime('%Y%m%d'): (today - timedelta(days=1)).strftime('%d. %m. %Y'),
     today.strftime('%Y%m%d'): today.strftime('%d. %m. %Y'),
+    (today - timedelta(days=1)).strftime('%Y%m%d'): (today - timedelta(days=1)).strftime('%d. %m. %Y'),
+    (today - timedelta(days=2)).strftime('%Y%m%d'): (today - timedelta(days=2)).strftime('%d. %m. %Y'),
 }
 
 date = st.selectbox(
