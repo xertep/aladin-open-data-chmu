@@ -334,7 +334,7 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
 
         diff_hours = (t - run_time).total_seconds() / 3600
 
-        if diff_hours % window_hours != 0:
+        if diff_hours % 1 != 0:
             continue
 
         # -----------------------------------
