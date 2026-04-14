@@ -387,7 +387,7 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         "#000080",  # 8 plískanice
         "#ffc000",  # 9 kroupy
         "#ff4040",  # 10 mrznoucí mrholení
-        "#ff4040"   # 11 mrznoucí déšť
+        "#ca1718"   # 11 mrznoucí déšť
     ]
 
     cmap = mcolors.ListedColormap(colors)
