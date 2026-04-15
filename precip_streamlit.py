@@ -35,7 +35,7 @@ header {
 
 if "seen_hint" not in st.session_state:
     st.markdown(
-        "<span style='font-size:28px;'>»</span> Pro mobil: menu s výběrem vrstev je vlevo nahoře (<span style='font-size:28px;'>»</span>)",
+        "<span style='font-size:28px;'>»</span> Pro mobil: menu s výběrem vrstev je vlevo nahoře",
         unsafe_allow_html=True
     )
     st.session_state["seen_hint"] = True
