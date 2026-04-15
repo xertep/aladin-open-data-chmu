@@ -19,6 +19,20 @@ st.set_page_config(
     page_icon="🌧️"                     # optional: emoji or path to an image
 )
 
+st.markdown("""
+<style>
+/* Reduce header but keep functionality */
+header {
+    visibility: visible;
+}
+
+/* Remove extra spacing */
+.block-container {
+    padding-top: 2.5rem !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 if "seen_hint" not in st.session_state:
     st.markdown(
         "<span style='font-size:28px;'>»</span> Pro mobil: menu s výběrem vrstev je vlevo nahoře",
