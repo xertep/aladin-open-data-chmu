@@ -223,18 +223,7 @@ cape_norm = mcolors.BoundaryNorm(cape_bounds, cape_cmap.N)
 
 @st.cache_data
 def load_kraje():
-    gdf = gpd.read_file("Kraje_NUTS_3_20260101.geojson")
-
-    # DEBUG (optional but useful once)
-    st.write("Original CRS:", gdf.crs)
-
-    # FORCE correct CRS if missing (very common in government files)
-    if gdf.crs is None:
-        gdf = gdf.set_crs("EPSG:3035")  # most likely for NUTS3 CZ file
-
-    # convert to lat/lon for Cartopy
-    gdf = gdf.to_crs("EPSG:4326")
-
+    gdf = gpd.read_file("kraje_wgs84.geojson")
     return gdf
 
 
