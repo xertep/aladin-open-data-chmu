@@ -6,5 +6,5 @@ matplotlib
 numpy
 pandas
 cartopy
-shapely
-geopandas
+geopandas>=0.14
+shapely>=2.0
