@@ -1055,8 +1055,8 @@ if layer == "Sluneční svit" and "sunshine_path" in st.session_state:
                 crs=ccrs.PlateCarree(),
                 edgecolor="magenta",
                 facecolor="none",
-                linewidth=0.5,
-                alpha=0.7
+                linewidth=1.5,
+                alpha=1.0
             )
 
         ax.set_axis_off()
