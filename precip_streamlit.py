@@ -1055,13 +1055,15 @@ if layer == "Sluneční svit" and "sunshine_path" in st.session_state:
                 crs=ccrs.PlateCarree(),
                 edgecolor="magenta",
                 facecolor="none",
-                linewidth=1.5,
-                alpha=1.0
+                linewidth=0.5,
+                alpha=0.7
             )
 
         ax.set_axis_off()
 
         st.pyplot(fig)
+
+        st.write(kraje[0].bounds)
 
     ds_sun.close()
 
