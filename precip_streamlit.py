@@ -222,7 +222,7 @@ cape_norm = mcolors.BoundaryNorm(cape_bounds, cape_cmap.N)
 
 @st.cache_data
 def load_kraje():
-    with open("cz_kraje.geojson", "r", encoding="utf-8") as f:
+    with open("Kraje_NUTS_3_20260101.geojson", "r", encoding="utf-8") as f:
         geojson = json.load(f)
 
     geometries = [shape(feature["geometry"]) for feature in geojson["features"]]
