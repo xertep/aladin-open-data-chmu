@@ -49,7 +49,7 @@ st.sidebar.title("Modelové vrstvy")
 
 layer = st.sidebar.radio(
     "Vyber vrstvu",
-    ["Srážky", "Typ srážek", "Teplota", "Tmin / Tmax", "Vítr", "Oblačnost"],
+    ["Srážky", "Typ srážek", "Teplota", "Tmin / Tmax", "Vítr", "Oblačnost", "Sluneční svit"],
     index=0
 )
 
@@ -103,6 +103,7 @@ cloud_high_url  = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1
 
 ptype_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_PRECIP_TYPESEV.grb.bz2"
 
+sunshine_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SUNSHINE_DUR.grb.bz2"
 
 def safe_load(url, label="Data"):
     with st.spinner(f"Načítám {label}..."):
@@ -187,6 +188,14 @@ cmap_high = mcolors.LinearSegmentedColormap.from_list(
 )
 
 
+sun_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "sunshine",
+    ["#1f4ba5", "#4f9cff", "#bfe8ff", "#fff799", "#ffd700"]
+)
+
+sun_norm = mcolors.Normalize(vmin=0, vmax=100)
+
+
 
 
 @st.cache_data
@@ -220,6 +229,8 @@ if st.sidebar.button("Načíst model"):
         st.session_state["cloud_mid_path"]   = safe_load(cloud_mid_url, "Oblačnost")
         st.session_state["cloud_high_path"]  = safe_load(cloud_high_url, "Oblačnost")
 
+    elif layer == "Sluneční svit":
+        st.session_state["sunshine_path"] = safe_load(sunshine_url, "Sluneční svit")
         
 
 if layer == "Srážky" and "precip_path" in st.session_state:
@@ -871,4 +882,70 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
     ds_low.close()
     ds_mid.close()
     ds_high.close()
+
+
+# ---- SUNSHINE ----
+if layer == "Sluneční svit" and "sunshine_path" in st.session_state:
+
+    ds_sun = open_grib(st.session_state["sunshine_path"])
+    sun = ds_sun[list(ds_sun.data_vars)[0]]
+
+    all_times = pd.to_datetime(sun.valid_time.values)
+    run_time = pd.to_datetime(ds_sun.time.values)
+
+    target_indices = []
+
+    for i, t in enumerate(all_times):
+        diff_hours = (t - run_time).total_seconds() / 3600
+
+        if diff_hours >= 3 and diff_hours % 3 == 0:
+            target_indices.append(i)
+
+    for idx in target_indices:
+
+        end_time = all_times[idx]
+        start_time = end_time - pd.Timedelta(hours=3)
+
+        start_idx = np.argmin(np.abs(all_times - start_time))
+
+        # cumulative difference
+        sunshine_sec = sun.isel(step=idx) - sun.isel(step=start_idx)
+
+        sunshine_sec = sunshine_sec.clip(min=0)
+
+        # convert to % of possible sunshine in 3h
+        sunshine_pct = (sunshine_sec / 10800) * 100
+
+        st.markdown(
+            f"#### Sluneční svit {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC ▼"
+        )
+
+        data_small = sunshine_pct[::2, ::2]
+
+        fig = plt.figure(figsize=(10, 6))
+        ax = plt.axes(projection=ccrs.Mercator())
+
+        ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
+
+        data_small.plot(
+            ax=ax,
+            transform=ccrs.PlateCarree(),
+            cmap=sun_cmap,
+            norm=sun_norm,
+            add_colorbar=True,
+            add_labels=False,
+            cbar_kwargs={
+                "label": "Sluneční svit (% z 3h)",
+                "ticks": [0, 20, 40, 60, 80, 100]
+            }
+        )
+
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+        ax.set_axis_off()
+
+        st.pyplot(fig)
+
+    ds_sun.close()
 
