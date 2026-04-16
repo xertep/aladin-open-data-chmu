@@ -5,4 +5,4 @@ matplotlib
 requests
 numpy
 cartopy
-geopandas>=0.14
+shapely
