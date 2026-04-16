@@ -49,7 +49,7 @@ st.sidebar.title("Modelové vrstvy")
 
 layer = st.sidebar.radio(
     "Vyber vrstvu",
-    ["Srážky", "Typ srážek", "Teplota", "Tmin / Tmax", "Vítr", "Oblačnost", "Sluneční svit"],
+    ["Srážky", "Typ srážek", "Teplota", "Tmin / Tmax", "Vítr", "Oblačnost", "Sluneční svit", "CAPE"],
     index=0
 )
 
@@ -104,6 +104,8 @@ cloud_high_url  = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1
 ptype_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_PRECIP_TYPESEV.grb.bz2"
 
 sunshine_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SUNSHINE_DUR.grb.bz2"
+
+cape_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFCAPE_POS_F00.grb.bz2"
 
 def safe_load(url, label="Data"):
     with st.spinner(f"Načítám {label}..."):
@@ -196,6 +198,25 @@ sun_cmap = mcolors.LinearSegmentedColormap.from_list(
 sun_norm = mcolors.Normalize(vmin=0, vmax=100)
 
 
+cape_bounds = [0, 50, 100, 250, 500, 1000, 1500, 2000, 3000, 4000]
+
+cape_colors = [
+    "#ffffff",
+    "#d4ffd4",
+    "#7fff7f",
+    "#ffff66",
+    "#ffcc33",
+    "#ff9933",
+    "#ff3333",
+    "#cc00cc",
+    "#660066"
+]
+
+cape_cmap = mcolors.ListedColormap(cape_colors)
+cape_cmap.set_over("#330033")
+
+cape_norm = mcolors.BoundaryNorm(cape_bounds, cape_cmap.N)
+
 
 
 @st.cache_data
@@ -231,6 +252,9 @@ if st.sidebar.button("Načíst model"):
 
     elif layer == "Sluneční svit":
         st.session_state["sunshine_path"] = safe_load(sunshine_url, "Sluneční svit")
+
+    elif layer == "CAPE":
+        st.session_state["cape_path"] = safe_load(cape_url, "CAPE")
         
 
 if layer == "Srážky" and "precip_path" in st.session_state:
@@ -948,4 +972,56 @@ if layer == "Sluneční svit" and "sunshine_path" in st.session_state:
         st.pyplot(fig)
 
     ds_sun.close()
+
+
+# ---- CAPE ----
+if layer == "CAPE" and "cape_path" in st.session_state:
+
+    ds_cape = open_grib(st.session_state["cape_path"])
+    cape = ds_cape[list(ds_cape.data_vars)[0]]
+
+    all_times = pd.to_datetime(cape.valid_time.values)
+    run_time = pd.to_datetime(ds_cape.time.values)
+
+    for idx, t in enumerate(all_times):
+
+        diff_hours = (t - run_time).total_seconds() / 3600
+
+        if diff_hours % 3 != 0:
+            continue
+
+        data = cape.isel(step=idx)
+        data = data.where(data >= 1)
+
+        st.markdown(f"#### CAPE – {t:%d.%m.%y %H:%M} UTC ▼")
+
+        data_small = data[::2, ::2]
+
+        fig = plt.figure(figsize=(10, 6))
+        ax = plt.axes(projection=ccrs.Mercator())
+
+        ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
+
+        data_small.plot(
+            ax=ax,
+            transform=ccrs.PlateCarree(),
+            cmap=cape_cmap,
+            norm=cape_norm,
+            add_colorbar=True,
+            add_labels=False,
+            cbar_kwargs={
+                "label": "CAPE (J/kg)",
+                "ticks": cape_bounds,
+                "extend": "max"
+            }
+        )
+
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+        ax.set_axis_off()
+
+        st.pyplot(fig)
+
+    ds_cape.close()
 
