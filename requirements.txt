@@ -1,8 +1,9 @@
 streamlit
+requests
 xarray
 cfgrib
 matplotlib
-requests
 numpy
+pandas
 cartopy
 shapely
