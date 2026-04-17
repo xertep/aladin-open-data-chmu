@@ -222,6 +222,11 @@ czech_days = [
         "pátku", "soboty", "neděle"
     ]
 
+czech_days_normal = [
+        "pondělí", "úterý", "středa", "čtvrtek",
+        "pátek", "sobota", "neděle"
+    ]
+
 def format_time_Prague(
     dt,
     from_tz="UTC",
@@ -628,7 +633,16 @@ if layer == "Teplota" and "temp_path" in st.session_state:
         # Kelvin -> Celsius
         data = temp.isel(step=idx) - 273.15
 
-        st.markdown(f"#### Teplota - {valid_time:%d.%m.%y %H:%M} UTC ▼")
+        # st.markdown(f"#### Teplota - {valid_time:%d.%m.%y %H:%M} UTC ▼")
+
+        den_valid = pd.Timestamp(valid_time, tz="UTC").tz_convert("Europe/Prague")
+        day_name_valid = czech_days_normal[den_valid.weekday()]
+
+        st.markdown(
+                f"<div style='font-weight:500; margin-bottom:2px;'>"
+                f"Teplota - {day_name_valid} {format_time_Prague(valid_time)} hod ▼</div>",
+                unsafe_allow_html=True
+            )
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]   # controls density (bigger = fewer labels)
@@ -714,7 +728,16 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
         else:
             continue
 
-        st.markdown(f"#### {title} - {valid_time:%d.%m.%y %H:%M} UTC ▼")
+        # st.markdown(f"#### {title} - {valid_time:%d.%m.%y %H:%M} UTC ▼")
+
+        den_valid = pd.Timestamp(valid_time, tz="UTC").tz_convert("Europe/Prague")
+        day_name_valid = czech_days[den_valid.weekday()]
+
+        st.markdown(
+                f"<div style='font-weight:500; margin-bottom:2px;'>"
+                f"{title} - do {day_name_valid} {format_time_Prague(valid_time)} hod ▼</div>",
+                unsafe_allow_html=True
+            )
 
         data_small = data[::2, ::2]
         label_data = data[::15, ::15]
@@ -826,7 +849,17 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
         # -------------------------
         # PLOT
         # -------------------------
-        st.markdown(f"#### Vítr – {t:%d.%m.%y %H:%M} UTC ▼")
+        # st.markdown(f"#### Vítr – {t:%d.%m.%y %H:%M} UTC ▼")
+
+        den_end = pd.Timestamp(t, tz="UTC").tz_convert("Europe/Prague")
+        day_name_end = czech_days_normal[den_end.weekday()]
+
+        st.markdown(
+                f"<div style='font-weight:500; margin-bottom:2px;'>"
+                f"Vítr - {day_name_end} {format_time_Prague(t)} hod ▼</div>",
+                unsafe_allow_html=True
+            )
+        
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
@@ -906,7 +939,16 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
         if diff_hours % 3 != 0:
             continue
 
-        st.markdown(f"#### Oblačnost – {t:%d.%m.%y %H:%M} UTC ▼")
+        # st.markdown(f"#### Oblačnost – {t:%d.%m.%y %H:%M} UTC ▼")
+
+        den_end = pd.Timestamp(t, tz="UTC").tz_convert("Europe/Prague")
+        day_name_end = czech_days_normal[den_end.weekday()]
+
+        st.markdown(
+                f"<div style='font-weight:500; margin-bottom:2px;'>"
+                f"Oblačnost - {day_name_end} {format_time_Prague(t)} hod ▼</div>",
+                unsafe_allow_html=True
+            )
 
         datasets = [
             (total, cmap_total, "Celková oblačnost"),
@@ -984,8 +1026,19 @@ if layer == "Sluneční svit" and "sunshine_path" in st.session_state:
         # convert to % of possible sunshine in 3h
         sunshine_pct = (sunshine_sec / 10800) * 100
 
+        # st.markdown(f"#### Sluneční svit {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC ▼")
+
+
+        den_start = pd.Timestamp(start_time, tz="UTC").tz_convert("Europe/Prague")
+        den_end = pd.Timestamp(end_time, tz="UTC").tz_convert("Europe/Prague")
+
+        day_name_start = czech_days[den_start.weekday()]
+        day_name_end = czech_days[den_end.weekday()]
+
         st.markdown(
-            f"#### Sluneční svit {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC ▼"
+            f"<div style='font-weight:500; margin-bottom:2px;'>"
+            f"Sluneční svit od {day_name_start} {format_time_Prague(start_time)} do {day_name_end} {format_time_Prague(end_time)} hod ▼</div>",
+            unsafe_allow_html=True
         )
 
         data_small = sunshine_pct[::2, ::2]
@@ -1037,7 +1090,16 @@ if layer == "CAPE" and "cape_path" in st.session_state:
         data = cape.isel(step=idx)
         data = data.where(data >= 1)
 
-        st.markdown(f"#### CAPE – {t:%d.%m.%y %H:%M} UTC ▼")
+        # st.markdown(f"#### CAPE – {t:%d.%m.%y %H:%M} UTC ▼")
+
+        den_end = pd.Timestamp(t, tz="UTC").tz_convert("Europe/Prague")
+        day_name_end = czech_days_normal[den_end.weekday()]
+
+        st.markdown(
+                f"<div style='font-weight:500; margin-bottom:2px;'>"
+                f"CAPE (most unstable) - {day_name_end} {format_time_Prague(t)} hod ▼</div>",
+                unsafe_allow_html=True
+            )
 
         data_small = data[::2, ::2]
 
