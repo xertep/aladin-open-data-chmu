@@ -13,7 +13,6 @@ import pandas as pd
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from datetime import datetime, timedelta
-from bs4 import BeautifulSoup
 import re
 
 st.set_page_config(
