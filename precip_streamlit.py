@@ -33,35 +33,12 @@ header {
 </style>
 """, unsafe_allow_html=True)
 
-if "seen_hint" not in st.session_state:
-    st.markdown(
-        "<span style='font-size:28px;'>»</span> Pro mobil: menu s výběrem vrstev je vlevo nahoře",
-        unsafe_allow_html=True
-    )
-    st.session_state["seen_hint"] = True
 
 st.markdown("### Model ALADIN")
 st.markdown(
     "Vizualizace výstupů numerického modelu ALADIN ve formě statických map s využitím open dat ČHMÚ"
 )
 
-st.sidebar.title("Modelové vrstvy")
-
-layer = st.sidebar.radio(
-    "Vyber vrstvu",
-    ["Srážky", "Typ srážek", "Teplota", "Tmin / Tmax", "Vítr", "Oblačnost", "Sluneční svit", "CAPE"],
-    index=0
-)
-
-if layer == "Srážky":
-    options = {
-        "3 h": 3,
-        "24 h": 24,
-        "72 h": 72
-    }
-
-    label = st.sidebar.selectbox("Suma srážek", options.keys())
-    window_hours = options[label]
 
 # ---- USER INPUT ----
 # ---- DATE OPTIONS (today + 2 previous days) ----
