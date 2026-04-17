@@ -1,6 +1,5 @@
 streamlit
 requests
-beautifulsoup4
 xarray
 cfgrib
 matplotlib
