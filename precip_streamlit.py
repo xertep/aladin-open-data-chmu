@@ -45,22 +45,29 @@ st.markdown(
 @st.cache_data(ttl=600)   # refresh every 10 min
 def get_latest_run():
     url = "https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/"
-    html = requests.get(url).text
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
 
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(response.text, "html.parser")
 
     runs = {}
 
-    for line in soup.get_text("\n").splitlines():
-        parts = line.split()
+    for row in soup.find_all("a"):
+        folder = row.get_text(strip=True).replace("/", "")
 
-        if len(parts) >= 3:
-            folder = parts[0].replace("/", "")
+        if folder in ["00", "06", "12", "18"]:
+            parent_text = row.parent.get_text(" ", strip=True)
 
-            if folder in ["00", "06", "12", "18"]:
+            try:
+                parts = parent_text.split()
                 dt_str = f"{parts[1]} {parts[2]}"
                 dt = datetime.strptime(dt_str, "%d-%b-%Y %H:%M")
                 runs[folder] = dt
+            except Exception:
+                continue
+
+    if not runs:
+        return datetime.today().strftime("%Y%m%d"), "00"
 
     latest_run = max(runs, key=runs.get)
     latest_date = runs[latest_run].strftime("%Y%m%d")
