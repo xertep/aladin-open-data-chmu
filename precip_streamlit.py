@@ -13,6 +13,7 @@ import pandas as pd
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from datetime import datetime, timedelta
+from bs4 import BeautifulSoup
 
 st.set_page_config(
     page_title="Aladin (open data ČHMÚ)",  # this changes the browser tab title
@@ -40,28 +41,60 @@ st.markdown(
 )
 
 
+
+@st.cache_data(ttl=600)   # refresh every 10 min
+def get_latest_run():
+    url = "https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/"
+    html = requests.get(url).text
+
+    soup = BeautifulSoup(html, "html.parser")
+
+    runs = {}
+
+    for line in soup.get_text("\n").splitlines():
+        parts = line.split()
+
+        if len(parts) >= 3:
+            folder = parts[0].replace("/", "")
+
+            if folder in ["00", "06", "12", "18"]:
+                dt_str = f"{parts[1]} {parts[2]}"
+                dt = datetime.strptime(dt_str, "%d-%b-%Y %H:%M")
+                runs[folder] = dt
+
+    latest_run = max(runs, key=runs.get)
+    latest_date = runs[latest_run].strftime("%Y%m%d")
+
+    return latest_date, latest_run
+
+
+
 # ---- USER INPUT ----
-# ---- DATE OPTIONS (today + 2 previous days) ----
-today = datetime.today()
+default_date, default_run = get_latest_run()
+
+latest_day = datetime.strptime(default_date, "%Y%m%d")
 
 date_map = {
-    today.strftime('%Y%m%d'): today.strftime('%d. %m. %Y'),
-    (today - timedelta(days=1)).strftime('%Y%m%d'): (today - timedelta(days=1)).strftime('%d. %m. %Y'),
-    (today - timedelta(days=2)).strftime('%Y%m%d'): (today - timedelta(days=2)).strftime('%d. %m. %Y'),
+    latest_day.strftime('%Y%m%d'): latest_day.strftime('%d. %m. %Y'),
+    (latest_day - timedelta(days=1)).strftime('%Y%m%d'): (latest_day - timedelta(days=1)).strftime('%d. %m. %Y'),
+    (latest_day - timedelta(days=2)).strftime('%Y%m%d'): (latest_day - timedelta(days=2)).strftime('%d. %m. %Y'),
 }
+
+date_options = list(date_map.keys())
 
 date = st.segmented_control(
     "Vyber datum",
-    options=list(date_map.keys()),
+    options=date_options,
     format_func=lambda x: date_map[x],
     selection_mode="single",
-    default=list(date_map.keys())[0]
+    default=default_date
 )
 
 run = st.segmented_control(
     "Vyber běh modelu",
     options=["00", "06", "12", "18"],
-    selection_mode="single"
+    selection_mode="single",
+    default=default_run
 )
 
 
