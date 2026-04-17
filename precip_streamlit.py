@@ -54,7 +54,8 @@ date = st.segmented_control(
     "Datum",
     options=list(date_map.keys()),
     format_func=lambda x: date_map[x],
-    selection_mode="single"
+    selection_mode="single",
+    default=options[0]
 )
 
 run = st.segmented_control(
@@ -87,7 +88,8 @@ if layer == "Srážky":
         "Suma",
         options=[3, 24, 72],
         format_func=lambda x: f"{x} h",
-        selection_mode="single"
+        selection_mode="single",
+        default=3
     )
 
 
