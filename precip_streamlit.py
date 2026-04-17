@@ -48,6 +48,8 @@ def get_latest_run():
     response = requests.get(url, timeout=10)
     response.raise_for_status()
 
+    st.text(response.text[:2000])
+
     soup = BeautifulSoup(response.text, "html.parser")
 
     runs = {}
