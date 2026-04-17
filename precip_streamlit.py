@@ -51,7 +51,7 @@ date_map = {
 }
 
 date = st.segmented_control(
-    "Datum",
+    "Vyber datum",
     options=list(date_map.keys()),
     format_func=lambda x: date_map[x],
     selection_mode="single",
@@ -59,14 +59,14 @@ date = st.segmented_control(
 )
 
 run = st.segmented_control(
-    "Běh modelu",
+    "Vyber běh modelu",
     options=["00", "06", "12", "18"],
     selection_mode="single"
 )
 
 
 layer = st.segmented_control(
-    "Vrstva",
+    "Vyber vrstvu",
     options=[
         "Srážky",
         "Typ srážek",
@@ -85,7 +85,7 @@ window_hours = None
 
 if layer == "Srážky":
     window_hours = st.segmented_control(
-        "Suma",
+        "Suma srážek",
         options=[3, 24, 72],
         format_func=lambda x: f"{x} h",
         selection_mode="single",
