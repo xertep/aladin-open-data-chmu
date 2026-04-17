@@ -73,13 +73,47 @@ date_map = {
     (today - timedelta(days=2)).strftime('%Y%m%d'): (today - timedelta(days=2)).strftime('%d. %m. %Y'),
 }
 
-date = st.selectbox(
+date = st.segmented_control(
     "Datum",
     options=list(date_map.keys()),
-    format_func=lambda x: date_map[x]
+    format_func=lambda x: date_map[x],
+    selection_mode="single"
 )
 
-run = st.selectbox("Běh modelu (UTC)", ["00", "06", "12", "18"])
+run = st.segmented_control(
+    "Běh modelu",
+    options=["00", "06", "12", "18"],
+    selection_mode="single"
+)
+
+
+layer = st.segmented_control(
+    "Vrstva",
+    options=[
+        "Srážky",
+        "Typ srážek",
+        "Teplota",
+        "Tmin / Tmax",
+        "Vítr",
+        "Oblačnost",
+        "Slunce",
+        "CAPE"
+    ],
+    selection_mode="single"
+)
+
+
+window_hours = None
+
+if layer == "Srážky":
+    window_hours = st.segmented_control(
+        "Suma",
+        options=[3, 24, 72],
+        format_func=lambda x: f"{x} h",
+        selection_mode="single"
+    )
+
+
 
 
 url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFPREC_TOTAL.grb.bz2"
@@ -246,7 +280,7 @@ def open_grib(path):
     return xr.open_dataset(path, engine="cfgrib")
 
 
-if st.sidebar.button("Načíst model"):
+if st.button("Načíst data"):
 
     if layer == "Srážky":
         st.session_state["precip_path"] = safe_load(url, "Srážky")
