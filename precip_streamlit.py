@@ -74,7 +74,7 @@ layer = st.segmented_control(
         "Tmin / Tmax",
         "Vítr",
         "Oblačnost",
-        "Slunce",
+        "Sluneční svit",
         "CAPE"
     ],
     selection_mode="single"
