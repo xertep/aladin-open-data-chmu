@@ -311,7 +311,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
         day_name_end = czech_days[den_end.weekday()]
 
         st.markdown(
-            f"72h suma srážek od {day_name_start} {format_time_Prague(start_time)} do {day_name_end} {format_time_Prague(end_time) hod ▼"
+            f"72h suma srážek od {day_name_start} {format_time_Prague(start_time)} do {day_name_end} {format_time_Prague(end_time)} hod ▼"
         )
 
         data_small = data[::2, ::2]
