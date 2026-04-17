@@ -304,10 +304,10 @@ if layer == "Srážky" and "precip_path" in st.session_state:
         data = data.clip(min=0)
         data = data.where(data >= 0.1)
 
-        den_start = pd.Timestamp(start_time, tz="UTC").tz_convert("Europe/Prague")
+        # den_start = pd.Timestamp(start_time, tz="UTC").tz_convert("Europe/Prague")
         den_end = pd.Timestamp(end_time, tz="UTC").tz_convert("Europe/Prague")
 
-        day_name_start = czech_days[den_start.weekday()]
+        # day_name_start = czech_days[den_start.weekday()]
         day_name_end = czech_days[den_end.weekday()]
 
         st.markdown(
@@ -373,8 +373,16 @@ if layer == "Srážky" and "precip_path" in st.session_state:
             data = data.clip(min=0)
             data = data.where(data >= 0.1)
 
+            den_start = pd.Timestamp(start_time, tz="UTC").tz_convert("Europe/Prague")
+            den_end = pd.Timestamp(end_time, tz="UTC").tz_convert("Europe/Prague")
+
+            day_name_start = czech_days[den_start.weekday()]
+            day_name_end = czech_days[den_end.weekday()]
+
             st.markdown(
-                f"#### Srážky {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC ({window_hours}h) ▼"
+                f"<div style='font-weight:500; margin-bottom:2px;'>"
+                f"Srážky od {day_name_start} {format_time_Prague(start_time)} do {day_name_end} {format_time_Prague(end_time)} hod ▼</div>",
+                unsafe_allow_html=True
             )
 
             data_small = data[::2, ::2]
