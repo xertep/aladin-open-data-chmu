@@ -526,10 +526,20 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
 
         ptype_final = xr.concat(window, dim="t").max(dim="t")
 
+        den_end = pd.Timestamp(t, tz="UTC").tz_convert("Europe/Prague")
+        day_name_end = czech_days[den_end.weekday()]
+
         # =====================================================
         # 5) PLOT
         # =====================================================
-        st.markdown(f"#### Typ srážek – {t:%d.%m.%Y %H:%M} UTC ({window_hours}h nejnebezpečnější typ) ▼")
+        # st.markdown(f"#### Typ srážek – {t:%d.%m.%Y %H:%M} UTC ({window_hours}h nejnebezpečnější typ) ▼")
+
+        st.markdown(
+                f"<div style='font-weight:500; margin-bottom:2px;'>"
+                f"Typ srážek (nejnebezpečnější typ za {window_hours} hodiny) do {day_name_end} {format_time_Prague(t)} hod ▼</div>",
+                unsafe_allow_html=True
+            )
+        
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
