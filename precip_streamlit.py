@@ -217,6 +217,23 @@ cape_cmap.set_over("#330033")
 
 cape_norm = mcolors.BoundaryNorm(cape_bounds, cape_cmap.N)
 
+czech_days = [
+        "pondělí", "úterý", "středy", "čtvrtka",
+        "pátku", "soboty", "neděle"
+    ]
+
+def format_time_Prague(
+    dt,
+    from_tz="UTC",
+    to_tz="Europe/Prague",
+    fmt="%d.%m. %H:%M"
+):
+    return (
+        pd.Timestamp(dt, tz=from_tz)
+        .tz_convert(to_tz)
+        .strftime(fmt)
+    )
+
 
 
 @st.cache_data
@@ -287,8 +304,14 @@ if layer == "Srážky" and "precip_path" in st.session_state:
         data = data.clip(min=0)
         data = data.where(data >= 0.1)
 
+        den_start = pd.Timestamp(start_time, tz="UTC").tz_convert("Europe/Prague")
+        den_end = pd.Timestamp(end_time, tz="UTC").tz_convert("Europe/Prague")
+
+        day_name_start = czech_days[den_start.weekday()]
+        day_name_end = czech_days[den_end.weekday()]
+
         st.markdown(
-            f"#### Srážky {start_time:%d.%m. %H:%M} – {end_time:%d.%m.%y %H:%M} UTC (72h) ▼"
+            f"72h suma srážek od {day_name_start} {format_time_Prague(start_time)} do {day_name_end} {format_time_Prague(end_time) hod ▼"
         )
 
         data_small = data[::2, ::2]
