@@ -55,7 +55,7 @@ date = st.segmented_control(
     options=list(date_map.keys()),
     format_func=lambda x: date_map[x],
     selection_mode="single",
-    default=options[0]
+    default=list(date_map.keys())[0]
 )
 
 run = st.segmented_control(
