@@ -48,25 +48,19 @@ def get_latest_run():
     response = requests.get(url, timeout=10)
     response.raise_for_status()
 
-    soup = BeautifulSoup(response.text, "html.parser")
-
     runs = {}
 
-    for a in soup.find_all("a"):
-        folder = a.get_text(strip=True).replace("/", "")
-
-        if folder in ["00", "06", "12", "18"]:
-            # the text after <a> is in the same <pre> line
-            line = a.parent.get_text(" ", strip=True)
-
+    for line in response.text.splitlines():
+        if "href=\"00/\"" in line or "href=\"06/\"" in line or "href=\"12/\"" in line or "href=\"18/\"" in line:
             parts = line.split()
 
             try:
-                # format: 00/ 17-Apr-2026 03:32 -
-                dt_str = f"{parts[1]} {parts[2]}"
-                dt = datetime.strptime(dt_str, "%d-%b-%Y %H:%M")
-                runs[folder] = dt
-            except Exception:
+                folder = parts[1].strip('href="/')
+                if folder in ["00", "06", "12", "18"]:
+                    dt_str = f"{parts[2]} {parts[3]}"
+                    dt = datetime.strptime(dt_str, "%d-%b-%Y %H:%M")
+                    runs[folder] = dt
+            except:
                 continue
 
     if not runs:
