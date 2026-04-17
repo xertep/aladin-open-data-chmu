@@ -14,6 +14,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
+import re
 
 st.set_page_config(
     page_title="Aladin (open data ČHMÚ)",  # this changes the browser tab title
@@ -50,21 +51,24 @@ def get_latest_run():
 
     runs = {}
 
-    for line in response.text.splitlines():
-        if "href=\"00/\"" in line or "href=\"06/\"" in line or "href=\"12/\"" in line or "href=\"18/\"" in line:
-            parts = line.split()
+    pattern = re.compile(
+        r'(\d{2})/.*?(\d{2}-[A-Za-z]{3}-\d{4}) (\d{2}:\d{2})'
+    )
 
-            try:
-                folder = parts[1].strip('href="/')
-                if folder in ["00", "06", "12", "18"]:
-                    dt_str = f"{parts[2]} {parts[3]}"
-                    dt = datetime.strptime(dt_str, "%d-%b-%Y %H:%M")
-                    runs[folder] = dt
-            except:
-                continue
+    for match in pattern.finditer(response.text):
+        folder = match.group(1)
+        date_str = match.group(2)
+        time_str = match.group(3)
+
+        if folder in ["00", "06", "12", "18"]:
+            dt = datetime.strptime(
+                f"{date_str} {time_str}",
+                "%d-%b-%Y %H:%M"
+            )
+            runs[folder] = dt
 
     if not runs:
-        return datetime.today().strftime("%Y%m%d"), "00"
+        return datetime.today().strftime("%Y%m%d"), "12"
 
     latest_run = max(runs, key=runs.get)
     latest_date = runs[latest_run].strftime("%Y%m%d")
