@@ -1058,13 +1058,14 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
             headaxislength=2
         )
 
-        k1 = ax.quiverkey(q, 0.89, 0.95, 2, "2 m/s", labelpos="E")
-        k2 = ax.quiverkey(q, 0.89, 0.90, 5, "5 m/s", labelpos="E")
-        k3 = ax.quiverkey(q, 0.89, 0.85, 7, "7 m/s", labelpos="E")
-        k4 = ax.quiverkey(q, 0.89, 0.80, 10, "10 m/s", labelpos="E")
-        k5 = ax.quiverkey(q, 0.89, 0.75, 13, "13 m/s", labelpos="E")
+        k1 = ax.quiverkey(q, 0.89, 0.97, 2, "2 m/s", labelpos="E")
+        k2 = ax.quiverkey(q, 0.89, 0.92, 3, "3 m/s", labelpos="E")
+        k3 = ax.quiverkey(q, 0.89, 0.87, 5, "5 m/s", labelpos="E")
+        k4 = ax.quiverkey(q, 0.89, 0.82, 7, "7 m/s", labelpos="E")
+        k5 = ax.quiverkey(q, 0.89, 0.77, 10, "10 m/s", labelpos="E")
+        k6 = ax.quiverkey(q, 0.89, 0.72, 13, "13 m/s", labelpos="E")
 
-        for k in [k1, k2, k3, k4, k5]:
+        for k in [k1, k2, k3, k4, k5, k6]:
             k.set_zorder(10)
 
 
