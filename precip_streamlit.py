@@ -1031,7 +1031,7 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
 
         wind_mag = np.sqrt(u**2 + v**2)
 
-        mask = wind_mag >= 1.5   # only show wind >= 1.5 m/s
+        mask = wind_mag >= 1.5
 
         u_barb = u.where(mask)
         v_barb = v.where(mask)
@@ -1040,11 +1040,14 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
         u_plot = u_barb[::skip, ::skip]
         v_plot = v_barb[::skip, ::skip]
 
+        u_knots = u_plot * 1.94384
+        v_knots = v_plot * 1.94384
+
         ax.barbs(
             u_plot.longitude,
             u_plot.latitude,
-            u_plot.values,
-            v_plot.values,
+            u_knots.values,
+            v_knots.values,
             transform=ccrs.PlateCarree(),
             length=5
         )
