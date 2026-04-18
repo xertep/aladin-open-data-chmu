@@ -1029,44 +1029,25 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
 
         ax.set_title("")
 
-        # --- WHITE LEGEND BACKGROUND ---
-        legend_box = mpatches.FancyBboxPatch(
-            (0.81, 0.70),   # x, y (bottom-left in axes coords)
-            0.17, 0.28,     # width, height
-            transform=ax.transAxes,
-            boxstyle="round,pad=0.02",
-            facecolor="white",
-            edgecolor="black",
-            linewidth=0.8,
-            alpha=1,
-            zorder=5
-        )
+        wind_mag = np.sqrt(u**2 + v**2)
 
-        ax.add_patch(legend_box)
+        mask = wind_mag >= 1.5   # only show wind >= 1.5 m/s
 
-        # ---- WIND ARROWS (QUIVER) ----
-        q = ax.quiver(
+        u_barb = u.where(mask)
+        v_barb = v.where(mask)
+
+        skip = 20
+        u_plot = u_barb[::skip, ::skip]
+        v_plot = v_barb[::skip, ::skip]
+
+        ax.barbs(
             u_plot.longitude,
             u_plot.latitude,
             u_plot.values,
             v_plot.values,
             transform=ccrs.PlateCarree(),
-            scale=150,
-            width=0.0075,
-            headwidth=3,
-            headlength=3,
-            headaxislength=2
+            length=5
         )
-
-        k1 = ax.quiverkey(q, 0.89, 0.97, 2, "2 m/s", labelpos="E")
-        k2 = ax.quiverkey(q, 0.89, 0.92, 3, "3 m/s", labelpos="E")
-        k3 = ax.quiverkey(q, 0.89, 0.87, 5, "5 m/s", labelpos="E")
-        k4 = ax.quiverkey(q, 0.89, 0.82, 7, "7 m/s", labelpos="E")
-        k5 = ax.quiverkey(q, 0.89, 0.77, 10, "10 m/s", labelpos="E")
-        k6 = ax.quiverkey(q, 0.89, 0.72, 13, "13 m/s", labelpos="E")
-
-        for k in [k1, k2, k3, k4, k5, k6]:
-            k.set_zorder(10)
 
 
         # ---- MAP FEATURES ----
