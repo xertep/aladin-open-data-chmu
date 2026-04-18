@@ -297,7 +297,7 @@ czech_days_normal = [
 @st.cache_data
 def load_kraje():
     gdf = gpd.read_file("kraje_wgs84.geojson")
-    gdf["geometry"] = gdf.geometry.simplify(0.005, preserve_topology=True)
+    gdf["geometry"] = gdf.geometry.simplify(0.01, preserve_topology=True)
     return gdf.geometry
 
 
@@ -447,7 +447,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
             }
         )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
         ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
 
         ax.add_geometries(
@@ -525,8 +525,17 @@ if layer == "Srážky" and "precip_path" in st.session_state:
                 }
             )
 
-            ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+            ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
             ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+            ax.add_geometries(
+                kraje,
+                crs=ccrs.PlateCarree(),
+                edgecolor="magenta",
+                facecolor="none",
+                linewidth=0.5,
+                alpha=0.7
+            )
 
             ax.set_axis_off()
 
@@ -671,8 +680,18 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         )
 
         ax.set_title("")
-        ax.add_feature(cfeature.BORDERS, edgecolor="black")
-        ax.add_feature(cfeature.COASTLINE, edgecolor="black")
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1.0)
+
+        ax.add_geometries(
+            kraje,
+            crs=ccrs.PlateCarree(),
+            edgecolor="magenta",
+            facecolor="none",
+            linewidth=0.5,
+            alpha=0.7
+        )
+        
         ax.set_axis_off()
 
         # =====================================================
@@ -797,8 +816,17 @@ if layer == "Teplota" and "temp_path" in st.session_state:
                     alpha=0.7
                 )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
         ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+        ax.add_geometries(
+            kraje,
+            crs=ccrs.PlateCarree(),
+            edgecolor="magenta",
+            facecolor="none",
+            linewidth=0.5,
+            alpha=0.7
+        )
 
         ax.set_axis_off()
 
@@ -891,8 +919,17 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
                     alpha=0.7
                 )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
         ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+        ax.add_geometries(
+            kraje,
+            crs=ccrs.PlateCarree(),
+            edgecolor="magenta",
+            facecolor="none",
+            linewidth=0.5,
+            alpha=0.7
+        )
 
         ax.set_axis_off()
 
@@ -1007,8 +1044,17 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
         )
 
         # ---- MAP FEATURES ----
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
         ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+        ax.add_geometries(
+            kraje,
+            crs=ccrs.PlateCarree(),
+            edgecolor="magenta",
+            facecolor="none",
+            linewidth=0.5,
+            alpha=0.7
+        )
 
         ax.set_axis_off()
 
@@ -1082,8 +1128,17 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
             ax.set_title(title)
 
             # ✅ borders like precip
-            ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+            ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
             ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+            ax.add_geometries(
+                kraje,
+                crs=ccrs.PlateCarree(),
+                edgecolor="magenta",
+                facecolor="none",
+                linewidth=0.5,
+                alpha=0.7
+            )
 
             ax.set_axis_off()
 
@@ -1159,8 +1214,17 @@ if layer == "Sluneční svit" and "sunshine_path" in st.session_state:
             }
         )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
         ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+        ax.add_geometries(
+            kraje,
+            crs=ccrs.PlateCarree(),
+            edgecolor="magenta",
+            facecolor="none",
+            linewidth=0.5,
+            alpha=0.7
+        )
 
         ax.set_axis_off()
 
@@ -1220,8 +1284,17 @@ if layer == "CAPE" and "cape_path" in st.session_state:
             }
         )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
         ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+        ax.add_geometries(
+            kraje,
+            crs=ccrs.PlateCarree(),
+            edgecolor="magenta",
+            facecolor="none",
+            linewidth=0.5,
+            alpha=0.7
+        )
 
         ax.set_axis_off()
 
