@@ -14,6 +14,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from datetime import datetime, timedelta
 import re
+import gc
 
 st.set_page_config(
     page_title="Aladin (open data ČHMÚ)",  # this changes the browser tab title
@@ -293,13 +294,39 @@ def format_time_Prague(
     )
 
 
+def cleanup_previous_data():
+    if "active_datasets" in st.session_state:
+        for ds in st.session_state["active_datasets"]:
+            try:
+                ds.close()
+            except:
+                pass
+
+    st.session_state["active_datasets"] = []
+
+    plt.close("all")
+
+    gc.collect()
+
 
 @st.cache_data
 def open_grib(path):
     return xr.open_dataset(path, engine="cfgrib")
 
 
+def safe_open_grib(path):
+    ds = open_grib(path)
+
+    if "active_datasets" not in st.session_state:
+        st.session_state["active_datasets"] = []
+
+    st.session_state["active_datasets"].append(ds)
+
+    return ds
+
+
 if st.button("Načíst data"):
+    cleanup_previous_data()
 
     if layer == "Srážky":
         st.session_state["precip_path"] = safe_load(url, "Srážky")
@@ -335,7 +362,7 @@ if st.button("Načíst data"):
 if layer == "Srážky" and "precip_path" in st.session_state:
     path = st.session_state["precip_path"]
 
-    ds = open_grib(path)
+    ds = safe_open_grib(path)
 
     # st.write("Data načtena")
 
@@ -404,6 +431,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
         ax.set_axis_off()
 
         st.pyplot(fig)
+        plt.close(fig)
 
     # ---- 3h and 24h (LOOP) ----
     else:
@@ -472,14 +500,12 @@ if layer == "Srážky" and "precip_path" in st.session_state:
             ax.set_axis_off()
 
             st.pyplot(fig)
-
-    ds.close()
-    del ds, tp
+            plt.close(fig)
 
 
 if layer == "Typ srážek" and "ptype_path" in st.session_state:
 
-    ds_ptype = open_grib(st.session_state["ptype_path"])
+    ds_ptype = safe_open_grib(st.session_state["ptype_path"])
     ptype = ds_ptype[list(ds_ptype.data_vars)[0]]
 
     all_times = pd.to_datetime(ptype.valid_time.values)
@@ -653,15 +679,14 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         )
 
         st.pyplot(fig)
-
-    ds_ptype.close()
+        plt.close(fig)
 
 
 
 # ---- LOAD TEMPERATURE ----
 
 if layer == "Teplota" and "temp_path" in st.session_state:
-    ds_temp = open_grib(st.session_state["temp_path"])
+    ds_temp = safe_open_grib(st.session_state["temp_path"])
 
     # st.write("Teplota načtena")
 
@@ -747,17 +772,15 @@ if layer == "Teplota" and "temp_path" in st.session_state:
         ax.set_axis_off()
 
         st.pyplot(fig)
+        plt.close(fig)
 
-    ds_temp.close()
-
-    del ds_temp, temp
 
 
 # ---- LOAD TMIN / TMAX ----
 if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
 
-    ds_tmax = open_grib(st.session_state["tmax_path"])
-    ds_tmin = open_grib(st.session_state["tmin_path"])
+    ds_tmax = safe_open_grib(st.session_state["tmax_path"])
+    ds_tmin = safe_open_grib(st.session_state["tmin_path"])
 
     tmax = ds_tmax[list(ds_tmax.data_vars)[0]]
     tmin = ds_tmin[list(ds_tmin.data_vars)[0]]
@@ -843,20 +866,16 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
         ax.set_axis_off()
 
         st.pyplot(fig)
+        plt.close(fig)
 
-    ds_tmax.close()
-    ds_tmin.close()
-
-    del ds_tmax, tmax
-    del ds_tmin, tmin
 
 
 # ---- WIND ----
 if layer == "Vítr" and "wind_speed_path" in st.session_state:
 
-    ds_ws = open_grib(st.session_state["wind_speed_path"])
-    ds_wd = open_grib(st.session_state["wind_dir_path"])
-    ds_gust = open_grib(st.session_state["gust_u_path"])  # scalar gust field (assumed)
+    ds_ws = safe_open_grib(st.session_state["wind_speed_path"])
+    ds_wd = safe_open_grib(st.session_state["wind_dir_path"])
+    ds_gust = safe_open_grib(st.session_state["gust_u_path"])  # scalar gust field (assumed)
 
     ws = ds_ws[list(ds_ws.data_vars)[0]]
     wd = ds_wd[list(ds_wd.data_vars)[0]]
@@ -963,19 +982,17 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
         ax.set_axis_off()
 
         st.pyplot(fig)
+        plt.close(fig)
 
-    ds_ws.close()
-    ds_wd.close()
-    ds_gust.close()
 
 
 # ---- CLOUDS ----
 if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
 
-    ds_total = open_grib(st.session_state["cloud_total_path"])
-    ds_low   = open_grib(st.session_state["cloud_low_path"])
-    ds_mid   = open_grib(st.session_state["cloud_mid_path"])
-    ds_high  = open_grib(st.session_state["cloud_high_path"])
+    ds_total = safe_open_grib(st.session_state["cloud_total_path"])
+    ds_low   = safe_open_grib(st.session_state["cloud_low_path"])
+    ds_mid   = safe_open_grib(st.session_state["cloud_mid_path"])
+    ds_high  = safe_open_grib(st.session_state["cloud_high_path"])
 
     total = ds_total[list(ds_total.data_vars)[0]]
     low   = ds_low[list(ds_low.data_vars)[0]]
@@ -1040,17 +1057,14 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
             ax.set_axis_off()
 
             st.pyplot(fig)
+            plt.close(fig)
 
-    ds_total.close()
-    ds_low.close()
-    ds_mid.close()
-    ds_high.close()
 
 
 # ---- SUNSHINE ----
 if layer == "Sluneční svit" and "sunshine_path" in st.session_state:
 
-    ds_sun = open_grib(st.session_state["sunshine_path"])
+    ds_sun = safe_open_grib(st.session_state["sunshine_path"])
     sun = ds_sun[list(ds_sun.data_vars)[0]]
 
     all_times = pd.to_datetime(sun.valid_time.values)
@@ -1120,14 +1134,14 @@ if layer == "Sluneční svit" and "sunshine_path" in st.session_state:
         ax.set_axis_off()
 
         st.pyplot(fig)
+        plt.close(fig)
 
-    ds_sun.close()
 
 
 # ---- CAPE ----
 if layer == "CAPE" and "cape_path" in st.session_state:
 
-    ds_cape = open_grib(st.session_state["cape_path"])
+    ds_cape = safe_open_grib(st.session_state["cape_path"])
     cape = ds_cape[list(ds_cape.data_vars)[0]]
 
     all_times = pd.to_datetime(cape.valid_time.values)
@@ -1181,6 +1195,6 @@ if layer == "CAPE" and "cape_path" in st.session_state:
         ax.set_axis_off()
 
         st.pyplot(fig)
+        plt.close(fig)
 
-    ds_cape.close()
 
