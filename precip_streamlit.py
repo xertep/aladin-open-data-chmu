@@ -1031,7 +1031,7 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
 
         # --- WHITE LEGEND BACKGROUND ---
         legend_box = mpatches.FancyBboxPatch(
-            (0.81, 0.67),   # x, y (bottom-left in axes coords)
+            (0.81, 0.69),   # x, y (bottom-left in axes coords)
             0.17, 0.28,     # width, height
             transform=ax.transAxes,
             boxstyle="round,pad=0.02",
@@ -1062,7 +1062,7 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
         k2 = ax.quiverkey(q, 0.9, 0.90, 5, "5 m/s", labelpos="E")
         k3 = ax.quiverkey(q, 0.9, 0.85, 7, "7 m/s", labelpos="E")
         k4 = ax.quiverkey(q, 0.9, 0.80, 10, "10 m/s", labelpos="E")
-        k5 = ax.quiverkey(q, 0.9, 0.42, 13, "13 m/s", labelpos="E")
+        k5 = ax.quiverkey(q, 0.9, 0.75, 13, "13 m/s", labelpos="E")
 
         for k in [k1, k2, k3, k4, k5]:
             k.set_zorder(10)
