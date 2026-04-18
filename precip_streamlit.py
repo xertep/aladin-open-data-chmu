@@ -1031,14 +1031,14 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
 
         # --- WHITE LEGEND BACKGROUND ---
         legend_box = mpatches.FancyBboxPatch(
-            (0.81, 0.70),   # x, y (bottom-left in axes coords)
+            (0.805, 0.70),   # x, y (bottom-left in axes coords)
             0.17, 0.28,     # width, height
             transform=ax.transAxes,
             boxstyle="round,pad=0.02",
             facecolor="white",
             edgecolor="black",
             linewidth=0.8,
-            alpha=0.9,
+            alpha=1,
             zorder=5
         )
 
