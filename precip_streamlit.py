@@ -1038,7 +1038,7 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
             transform=ccrs.PlateCarree(),
             scale=150,        # adjust visibility
             width=0.0075,
-            headwidth=2,
+            headwidth=3,
             headlength=3,
             headaxislength=2
         )
