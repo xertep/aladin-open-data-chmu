@@ -1029,6 +1029,21 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
 
         ax.set_title("")
 
+        # --- WHITE LEGEND BACKGROUND ---
+        legend_box = mpatches.FancyBboxPatch(
+            (0.78, 0.62),   # x, y (bottom-left in axes coords)
+            0.22, 0.38,     # width, height
+            transform=ax.transAxes,
+            boxstyle="round,pad=0.02",
+            facecolor="white",
+            edgecolor="black",
+            linewidth=0.8,
+            alpha=0.9,
+            zorder=5
+        )
+
+        ax.add_patch(legend_box)
+
         # ---- WIND ARROWS (QUIVER) ----
         q = ax.quiver(
             u_plot.longitude,
