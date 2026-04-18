@@ -773,7 +773,7 @@ if layer == "Teplota" and "temp_path" in st.session_state:
             )
 
         data_small = data[::2, ::2]
-        label_data = data[::20, ::20]   # controls density (bigger = fewer labels)
+        label_data = data[::17, ::17]   # controls density (bigger = fewer labels)
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
@@ -875,7 +875,7 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
             )
 
         data_small = data[::2, ::2]
-        label_data = data[::20, ::20]
+        label_data = data[::17, ::17]
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
