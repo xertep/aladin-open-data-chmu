@@ -43,37 +43,48 @@ st.markdown(
 
 
 
-@st.cache_data(ttl=600)   # refresh every 10 min
+@st.cache_data(ttl=600) # refresh every 10 minutes
 def get_latest_run():
-    url = "https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/"
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
+    base_url = "https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/"
+    run_list = ["00", "06", "12", "18"]
 
-    runs = {}
+    newest = None
+    newest_run = None
 
     pattern = re.compile(
-        r'(\d{2})/.*?(\d{2}-[A-Za-z]{3}-\d{4}) (\d{2}:\d{2})'
+        r'ALADCZ1K4opendata_(\d{8})(\d{2}).*?(\d{2}-[A-Za-z]{3}-\d{4}) (\d{2}:\d{2})'
     )
 
-    for match in pattern.finditer(response.text):
-        folder = match.group(1)
-        date_str = match.group(2)
-        time_str = match.group(3)
+    for run in run_list:
+        url = f"{base_url}{run}/"
 
-        if folder in ["00", "06", "12", "18"]:
-            dt = datetime.strptime(
-                f"{date_str} {time_str}",
-                "%d-%b-%Y %H:%M"
-            )
-            runs[folder] = dt
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
 
-    if not runs:
+            for match in pattern.finditer(response.text):
+                file_date = match.group(1)
+                file_run = match.group(2)
+                mod_date = match.group(3)
+                mod_time = match.group(4)
+
+                dt = datetime.strptime(
+                    f"{mod_date} {mod_time}",
+                    "%d-%b-%Y %H:%M"
+                )
+
+                if newest is None or dt > newest:
+                    newest = dt
+                    newest_run = file_run
+                    newest_date = file_date
+
+        except Exception:
+            continue
+
+    if newest_run is None:
         return datetime.today().strftime("%Y%m%d"), "12"
 
-    latest_run = max(runs, key=runs.get)
-    latest_date = runs[latest_run].strftime("%Y%m%d")
-
-    return latest_date, latest_run
+    return newest_date, newest_run
 
 
 
