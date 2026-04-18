@@ -43,7 +43,7 @@ st.markdown(
 
 
 
-@st.cache_data(ttl=600) # refresh every 10 minutes
+@st.cache_data(ttl=600, show_spinner="Načítám data...") # refresh every 10 minutes
 def get_latest_run():
     base_url = "https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/"
     run_list = ["00", "06", "12", "18"]
