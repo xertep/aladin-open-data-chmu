@@ -1050,7 +1050,7 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
             v_knots.values,
             transform=ccrs.PlateCarree(),
             length=6,
-            sizes=dict(spacing=0.18)
+            sizes=dict(spacing=0.15)
         )
 
 
