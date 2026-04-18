@@ -1039,7 +1039,7 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
             edgecolor="black",
             linewidth=0.8,
             alpha=0.9,
-            zorder=0
+            zorder=5
         )
 
         ax.add_patch(legend_box)
@@ -1058,11 +1058,14 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
             headaxislength=2
         )
 
-        ax.quiverkey(q, 0.9, 0.95, 2, "2 m/s", labelpos="E")
-        ax.quiverkey(q, 0.9, 0.88, 5, "5 m/s", labelpos="E")
-        ax.quiverkey(q, 0.9, 0.81, 7, "7 m/s", labelpos="E")
-        ax.quiverkey(q, 0.9, 0.74, 10, "10 m/s", labelpos="E")
-        ax.quiverkey(q, 0.9, 0.67, 13, "13 m/s", labelpos="E")
+        k1 = ax.quiverkey(q, 0.9, 0.95, 2, "2 m/s", labelpos="E")
+        k2 = ax.quiverkey(q, 0.9, 0.88, 5, "5 m/s", labelpos="E")
+        k3 = ax.quiverkey(q, 0.9, 0.81, 7, "7 m/s", labelpos="E")
+        k4 = ax.quiverkey(q, 0.9, 0.74, 10, "10 m/s", labelpos="E")
+        k5 = ax.quiverkey(q, 0.9, 0.67, 13, "13 m/s", labelpos="E")
+
+        for k in [k1, k2, k3, k4, k5]:
+            k.set_zorder(10)
 
 
         # ---- MAP FEATURES ----
