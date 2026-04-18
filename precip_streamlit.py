@@ -456,7 +456,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
             edgecolor="magenta",
             facecolor="none",
             linewidth=0.5,
-            alpha=0.7
+            alpha=1
         )
 
         ax.set_axis_off()
@@ -534,7 +534,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
                 edgecolor="magenta",
                 facecolor="none",
                 linewidth=0.5,
-                alpha=0.7
+                alpha=1
             )
 
             ax.set_axis_off()
@@ -689,7 +689,7 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
             edgecolor="magenta",
             facecolor="none",
             linewidth=0.5,
-            alpha=0.7
+            alpha=1
         )
         
         ax.set_axis_off()
@@ -773,7 +773,7 @@ if layer == "Teplota" and "temp_path" in st.session_state:
             )
 
         data_small = data[::2, ::2]
-        label_data = data[::15, ::15]   # controls density (bigger = fewer labels)
+        label_data = data[::20, ::20]   # controls density (bigger = fewer labels)
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
@@ -825,7 +825,7 @@ if layer == "Teplota" and "temp_path" in st.session_state:
             edgecolor="magenta",
             facecolor="none",
             linewidth=0.5,
-            alpha=0.7
+            alpha=1
         )
 
         ax.set_axis_off()
@@ -875,7 +875,7 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
             )
 
         data_small = data[::2, ::2]
-        label_data = data[::15, ::15]
+        label_data = data[::20, ::20]
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
@@ -928,7 +928,7 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
             edgecolor="magenta",
             facecolor="none",
             linewidth=0.5,
-            alpha=0.7
+            alpha=1
         )
 
         ax.set_axis_off()
@@ -1053,7 +1053,7 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
             edgecolor="magenta",
             facecolor="none",
             linewidth=0.5,
-            alpha=0.7
+            alpha=1
         )
 
         ax.set_axis_off()
@@ -1137,7 +1137,7 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
                 edgecolor="magenta",
                 facecolor="none",
                 linewidth=0.5,
-                alpha=0.7
+                alpha=1
             )
 
             ax.set_axis_off()
@@ -1223,7 +1223,7 @@ if layer == "Sluneční svit" and "sunshine_path" in st.session_state:
             edgecolor="magenta",
             facecolor="none",
             linewidth=0.5,
-            alpha=0.7
+            alpha=1
         )
 
         ax.set_axis_off()
@@ -1293,7 +1293,7 @@ if layer == "CAPE" and "cape_path" in st.session_state:
             edgecolor="magenta",
             facecolor="none",
             linewidth=0.5,
-            alpha=0.7
+            alpha=1
         )
 
         ax.set_axis_off()
