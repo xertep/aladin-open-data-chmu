@@ -1036,7 +1036,7 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
         u_barb = u.where(mask)
         v_barb = v.where(mask)
 
-        skip = 20
+        skip = 25
         u_plot = u_barb[::skip, ::skip]
         v_plot = v_barb[::skip, ::skip]
 
@@ -1050,7 +1050,7 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
             v_knots.values,
             transform=ccrs.PlateCarree(),
             length=6,
-            sizes=dict(spacing=0.3)
+            sizes=dict(spacing=0.2)
         )
 
 
