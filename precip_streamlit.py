@@ -1030,18 +1030,24 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
         ax.set_title("")
 
         # ---- WIND ARROWS (QUIVER) ----
-        ax.quiver(
+        q = ax.quiver(
             u_plot.longitude,
             u_plot.latitude,
             u_plot.values,
             v_plot.values,
             transform=ccrs.PlateCarree(),
-            scale=150,        # adjust visibility
+            scale=150,
             width=0.0075,
             headwidth=3,
             headlength=3,
             headaxislength=2
         )
+
+        ax.quiverkey(q, 0.9, -0.05, 2, "2 m/s", labelpos="E")
+        ax.quiverkey(q, 0.9, -0.12, 5, "5 m/s", labelpos="E")
+        ax.quiverkey(q, 0.9, -0.19, 7, "7 m/s", labelpos="E")
+        ax.quiverkey(q, 0.9, -0.26, 10, "10 m/s", labelpos="E")
+        ax.quiverkey(q, 0.9, -0.33, 13, "13 m/s", labelpos="E")
 
         # ---- MAP FEATURES ----
         ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
