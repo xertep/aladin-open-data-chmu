@@ -15,6 +15,7 @@ import cartopy.feature as cfeature
 from datetime import datetime, timedelta
 import re
 import gc
+import geopandas as gpd
 
 st.set_page_config(
     page_title="Aladin (open data ČHMÚ)",  # this changes the browser tab title
@@ -292,6 +293,14 @@ czech_days_normal = [
         "pátek", "sobota", "neděle"
     ]
 
+
+@st.cache_data
+def load_kraje():
+    gdf = gpd.read_file("kraje_wgs84.geojson")
+    gdf["geometry"] = gdf.geometry.simplify(0.005, preserve_topology=True)
+    return gdf.geometry
+
+
 def format_time_Prague(
     dt,
     from_tz="UTC",
@@ -335,6 +344,8 @@ def safe_open_grib(path):
 
     return ds
 
+
+kraje = load_kraje()
 
 if st.button("Načíst data"):
     cleanup_previous_data()
@@ -438,6 +449,15 @@ if layer == "Srážky" and "precip_path" in st.session_state:
 
         ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1)
         ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+
+        ax.add_geometries(
+            kraje,
+            crs=ccrs.PlateCarree(),
+            edgecolor="magenta",
+            facecolor="none",
+            linewidth=0.5,
+            alpha=0.7
+        )
 
         ax.set_axis_off()
 
