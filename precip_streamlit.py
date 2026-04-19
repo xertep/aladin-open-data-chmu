@@ -458,7 +458,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
             crs=ccrs.PlateCarree(),
             edgecolor="magenta",
             facecolor="none",
-            linewidth=0.5,
+            linewidth=1.2,
             alpha=1
         )
 
@@ -536,7 +536,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
                 crs=ccrs.PlateCarree(),
                 edgecolor="magenta",
                 facecolor="none",
-                linewidth=0.5,
+                linewidth=1.2,
                 alpha=1
             )
 
@@ -691,7 +691,7 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
             crs=ccrs.PlateCarree(),
             edgecolor="magenta",
             facecolor="none",
-            linewidth=0.5,
+            linewidth=1.2,
             alpha=1
         )
         
@@ -827,7 +827,7 @@ if layer == "Teplota" and "temp_path" in st.session_state:
             crs=ccrs.PlateCarree(),
             edgecolor="magenta",
             facecolor="none",
-            linewidth=0.5,
+            linewidth=1.2,
             alpha=1
         )
 
@@ -930,7 +930,7 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
             crs=ccrs.PlateCarree(),
             edgecolor="magenta",
             facecolor="none",
-            linewidth=0.5,
+            linewidth=1.2,
             alpha=1
         )
 
@@ -1066,7 +1066,7 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
             crs=ccrs.PlateCarree(),
             edgecolor="magenta",
             facecolor="none",
-            linewidth=0.5,
+            linewidth=1.2,
             alpha=1
         )
 
@@ -1150,7 +1150,7 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
                 crs=ccrs.PlateCarree(),
                 edgecolor="magenta",
                 facecolor="none",
-                linewidth=0.5,
+                linewidth=1.2,
                 alpha=1
             )
 
