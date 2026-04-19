@@ -450,8 +450,8 @@ if layer == "Srážky" and "precip_path" in st.session_state:
             }
         )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
-        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2.0)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1.5)
 
         ax.add_geometries(
             kraje,
@@ -528,8 +528,8 @@ if layer == "Srážky" and "precip_path" in st.session_state:
                 }
             )
 
-            ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
-            ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+            ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2.0)
+            ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1.5)
 
             ax.add_geometries(
                 kraje,
@@ -683,7 +683,7 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
         )
 
         ax.set_title("")
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2.0)
         ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1.0)
 
         ax.add_geometries(
@@ -819,8 +819,8 @@ if layer == "Teplota" and "temp_path" in st.session_state:
                     alpha=0.7
                 )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
-        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2.0)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1.5)
 
         ax.add_geometries(
             kraje,
@@ -922,8 +922,8 @@ if layer == "Tmin / Tmax" and "tmax_path" in st.session_state:
                     alpha=0.7
                 )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
-        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2.0)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1.5)
 
         ax.add_geometries(
             kraje,
@@ -1058,8 +1058,8 @@ if layer == "Vítr" and "wind_speed_path" in st.session_state:
 
 
         # ---- MAP FEATURES ----
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
-        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2.0)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1.5)
 
         ax.add_geometries(
             kraje,
@@ -1142,8 +1142,8 @@ if layer == "Oblačnost" and "cloud_total_path" in st.session_state:
             ax.set_title(title)
 
             # ✅ borders like precip
-            ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
-            ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+            ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2.0)
+            ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1.5)
 
             ax.add_geometries(
                 kraje,
@@ -1228,8 +1228,8 @@ if layer == "Sluneční svit" and "sunshine_path" in st.session_state:
             }
         )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
-        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2.0)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1.5)
 
         ax.add_geometries(
             kraje,
@@ -1298,8 +1298,8 @@ if layer == "CAPE" and "cape_path" in st.session_state:
             }
         )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=1.2)
-        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2.0)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=1.5)
 
         ax.add_geometries(
             kraje,
