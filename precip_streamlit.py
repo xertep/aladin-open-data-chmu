@@ -92,30 +92,33 @@ def get_latest_run():
 # ---- USER INPUT ----
 default_date, default_run = get_latest_run()
 
-latest_day = datetime.strptime(default_date, "%Y%m%d")
+# create datetime of latest model cycle
+latest_dt = datetime.strptime(f"{default_date}{default_run}", "%Y%m%d%H")
 
-date_map = {
-    latest_day.strftime('%Y%m%d'): latest_day.strftime('%d. %m. %Y'),
-    (latest_day - timedelta(days=1)).strftime('%Y%m%d'): (latest_day - timedelta(days=1)).strftime('%d. %m. %Y'),
-    (latest_day - timedelta(days=2)).strftime('%Y%m%d'): (latest_day - timedelta(days=2)).strftime('%d. %m. %Y'),
-}
+# build last 9 model runs backwards by 6 hours
+run_options = []
+run_labels = {}
 
-date_options = list(date_map.keys())
+for i in range(9):
+    dt = latest_dt - timedelta(hours=6 * i)
 
-date = st.segmented_control(
-    "Vyber datum",
-    options=date_options,
-    format_func=lambda x: date_map[x],
-    selection_mode="single",
-    default=default_date
-)
+    key = dt.strftime("%Y%m%d%H")   # internal key
+    label = dt.strftime("%d.%m. %H UTC")  # displayed label
 
-run = st.segmented_control(
+    run_options.append(key)
+    run_labels[key] = label
+
+selected_cycle = st.segmented_control(
     "Vyber běh modelu",
-    options=["00", "06", "12", "18"],
+    options=run_options,
+    format_func=lambda x: run_labels[x],
     selection_mode="single",
-    default=default_run
+    default=run_options[0]
 )
+
+# split selected value back into date + run
+date = selected_cycle[:8]
+run = selected_cycle[8:]
 
 
 layer = st.segmented_control(
