@@ -186,7 +186,7 @@ def safe_load(url, label="Data"):
             st.stop()
 
 
-@st.cache_data(show_spinner=True)
+@st.cache_data(show_spinner=False)
 def load_data(url):
     r = requests.get(url)
     compressed = r.content
