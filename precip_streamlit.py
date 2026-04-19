@@ -39,7 +39,7 @@ header {
 
 st.markdown("### Model ALADIN")
 st.markdown(
-    "Vizualizace výstupů numerického modelu ALADIN ve formě statických map s využitím open dat ČHMÚ"
+    "Vizualizace výstupů numerického modelu ALADIN (ALAX 1x1 km) ve formě statických map s využitím open dat ČHMÚ"
 )
 
 
@@ -501,7 +501,7 @@ if layer == "Srážky" and "precip_path" in st.session_state:
 
             st.markdown(
                 f"<div style='font-weight:500; margin-bottom:2px;'>"
-                f"Srážky od {day_name_start} {format_time_Prague(start_time)} do {day_name_end} {format_time_Prague(end_time)} hod ▼</div>",
+                f"Srážky za {window_hours} h do {day_name_end} {format_time_Prague(end_time)} hod ▼</div>",
                 unsafe_allow_html=True
             )
 
@@ -663,7 +663,7 @@ if layer == "Typ srážek" and "ptype_path" in st.session_state:
 
         st.markdown(
                 f"<div style='font-weight:500; margin-bottom:2px;'>"
-                f"Typ srážek (nejnebezpečnější typ za {window_hours} hodiny) do {day_name_end} {format_time_Prague(t)} hod ▼</div>",
+                f"Nejnebezpečnější typ srážek za {window_hours} h do {day_name_end} {format_time_Prague(t)} hod ▼</div>",
                 unsafe_allow_html=True
             )
         
@@ -1204,7 +1204,7 @@ if layer == "Sluneční svit" and "sunshine_path" in st.session_state:
 
         st.markdown(
             f"<div style='font-weight:500; margin-bottom:2px;'>"
-            f"Sluneční svit od {day_name_start} {format_time_Prague(start_time)} do {day_name_end} {format_time_Prague(end_time)} hod ▼</div>",
+            f"Sluneční svit za 3 h do {day_name_end} {format_time_Prague(end_time)} hod ▼</div>",
             unsafe_allow_html=True
         )
 
