@@ -300,7 +300,7 @@ czech_days_normal = [
 @st.cache_data(show_spinner=False)
 def load_kraje():
     gdf = gpd.read_file("kraje_wgs84.geojson")
-    gdf["geometry"] = gdf.geometry.simplify(0.01, preserve_topology=True)
+    gdf["geometry"] = gdf.geometry.simplify(0.013, preserve_topology=True)
     return gdf.geometry
 
 
