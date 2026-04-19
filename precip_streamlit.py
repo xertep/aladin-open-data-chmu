@@ -177,7 +177,7 @@ sunshine_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/
 cape_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFCAPE_POS_F00.grb.bz2"
 
 def safe_load(url, label="Data"):
-    with st.spinner(f"Načítám {label}..."):
+    with st.spinner(f"Načítám vrstvu: {label}..."):
         try:
             path = load_data(url)
             return path
@@ -297,7 +297,7 @@ czech_days_normal = [
     ]
 
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def load_kraje():
     gdf = gpd.read_file("kraje_wgs84.geojson")
     gdf["geometry"] = gdf.geometry.simplify(0.01, preserve_topology=True)
@@ -332,7 +332,7 @@ def cleanup_previous_data():
     gc.collect()
 
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def open_grib(path):
     return xr.open_dataset(path, engine="cfgrib")
 
