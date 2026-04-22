@@ -1377,7 +1377,8 @@ if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
         ax = plt.axes(projection=ccrs.Mercator())
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
-        plot_data = shear[::12, ::12]
+        plot_data = shear[::20, ::20]
+        st.write(plot_data.coords)
 
         for i in range(plot_data.shape[0]):
             for j in range(plot_data.shape[1]):
@@ -1387,8 +1388,8 @@ if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
                     continue
 
                 ax.text(
-                    plot_data.longitude.values[j],
-                    plot_data.latitude.values[i],
+                    plot_data.longitude.values[i, j],
+                    plot_data.latitude.values[i, j],
                     f"{int(val)}",
                     color=shear_color(val),
                     fontsize=8,
