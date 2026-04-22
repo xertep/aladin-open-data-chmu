@@ -1380,7 +1380,7 @@ if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
         plot_data = shear[::12, ::12]
 
         for i in range(plot_data.shape[0]):
-            for j in range(plot_data.shape[1]:
+            for j in range(plot_data.shape[1]):
                 val = plot_data.values[i, j]
 
                 if np.isnan(val):
