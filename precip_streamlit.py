@@ -1501,16 +1501,15 @@ if layer == "Zmax" and "zmax_path" in st.session_state:
             continue
 
         data = zmax.isel(step=idx)
-        st.write(data.dims)
 
-        data = data.where(
+        mask = (
             (data.longitude >= 12) &
             (data.longitude <= 19) &
             (data.latitude >= 48.3) &
             (data.latitude <= 51.2)
         )
 
-        plot_data = data.copy()
+        data = data.where(mask, drop=False)
 
 
         den_end = pd.Timestamp(t, tz="UTC").tz_convert("Europe/Prague")
@@ -1528,7 +1527,7 @@ if layer == "Zmax" and "zmax_path" in st.session_state:
 
         # plot_data = data[::3, ::3]
 
-        plot_data.plot(
+        data.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
             cmap=zmax_cmap,
