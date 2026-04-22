@@ -1347,10 +1347,10 @@ if layer == "CAPE" and "cape_path" in st.session_state:
 
 if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
 
-    ds_ws = safe_open_grib(st.session_state["wind_speed_path"])
-    ds_wd = safe_open_grib(st.session_state["wind_dir_path"])
-    ds_u500 = safe_open_grib(st.session_state["shear_u_path"])
-    ds_v500 = safe_open_grib(st.session_state["shear_v_path"])
+    ds_ws = safe_open_grib(st.session_state["shear_surface_speed_path"])
+    ds_wd = safe_open_grib(st.session_state["shear_surface_dir_path"])
+    ds_u500 = safe_open_grib(st.session_state["shear_u500_path"])
+    ds_v500 = safe_open_grib(st.session_state["shear_v500_path"])
 
     ws = ds_ws[list(ds_ws.data_vars)[0]]
     wd = ds_wd[list(ds_wd.data_vars)[0]]
