@@ -1502,15 +1502,7 @@ if layer == "Zmax" and "zmax_path" in st.session_state:
 
         data = zmax.isel(step=idx)
 
-        mask = (
-            (data.longitude >= 12) &
-            (data.longitude <= 19) &
-            (data.latitude >= 48.3) &
-            (data.latitude <= 51.2)
-        )
-
-        data = data.where(mask, drop=False)
-
+        plot_data = data
 
         den_end = pd.Timestamp(t, tz="UTC").tz_convert("Europe/Prague")
         day_name_end = czech_days_normal[den_end.weekday()]
@@ -1527,7 +1519,7 @@ if layer == "Zmax" and "zmax_path" in st.session_state:
 
         # plot_data = data[::3, ::3]
 
-        data.plot(
+        plot_data.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
             cmap=zmax_cmap,
