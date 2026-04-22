@@ -1503,19 +1503,14 @@ if layer == "Zmax" and "zmax_path" in st.session_state:
         data = zmax.isel(step=idx)
         st.write(data.dims)
 
-        mask = (
+        data = data.where(
             (data.longitude >= 12) &
             (data.longitude <= 19) &
             (data.latitude >= 48.3) &
             (data.latitude <= 51.2)
         )
 
-        data = data.where(mask)
-
-        plot_data = data.isel(
-            x=slice(None, None, 3),
-            y=slice(None, None, 3)
-        )
+        plot_data = data.copy()
 
 
         den_end = pd.Timestamp(t, tz="UTC").tz_convert("Europe/Prague")
