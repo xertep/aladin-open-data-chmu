@@ -1413,7 +1413,10 @@ if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
         plot_data = shear[::10, ::10]
 
         cape_data = cape.isel(step=idx)
-        cape_data = cape_data.where(mask)
+        cape_data = cape_data.sel(
+            longitude=slice(12, 19),
+            latitude=slice(48.3, 51.2)
+        )
 
         cape_plot = cape_data[::2, ::2]
 
@@ -1424,6 +1427,8 @@ if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
             norm=cape_norm,
             add_colorbar=True,
             add_labels=False,
+            alpha=0.9,
+            zorder=1,
             cbar_kwargs={"label": "CAPE (J/kg)"}
         )
 
@@ -1443,10 +1448,11 @@ if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
                     fontweight="bold",
                     ha="center",
                     va="center",
-                    transform=ccrs.PlateCarree()
+                    transform=ccrs.PlateCarree(),
+                    zorder=3
                 )
 
-        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2)
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2, zorder=4)
         ax.add_geometries(
             kraje,
             crs=ccrs.PlateCarree(),
