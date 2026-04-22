@@ -132,7 +132,7 @@ layer = st.segmented_control(
         "Oblačnost",
         "Sluneční svit",
         "CAPE",
-        "Wind shear"
+        "Střih větru"
     ],
     selection_mode="single"
 )
@@ -410,7 +410,7 @@ if st.button("Načíst data"):
     elif layer == "CAPE":
         st.session_state["cape_path"] = safe_load(cape_url, "CAPE")
 
-    elif layer == "Wind shear":
+    elif layer == "Střih větru":
         st.session_state["shear_surface_speed_path"] = safe_load(shear_surface_speed_url, "Wind shear")
         st.session_state["shear_surface_dir_path"] = safe_load(shear_surface_dir_url, "Wind shear")
         st.session_state["shear_u500_path"] = safe_load(shear_u500_url, "Wind shear")
@@ -1350,7 +1350,7 @@ if layer == "CAPE" and "cape_path" in st.session_state:
 
 
 
-if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
+if layer == "Střih větru" and "shear_surface_speed_path" in st.session_state:
 
     ds_cape = safe_open_grib(st.session_state["shear_cape_path"])
     cape = ds_cape[list(ds_cape.data_vars)[0]]
