@@ -1413,10 +1413,7 @@ if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
         plot_data = shear[::10, ::10]
 
         cape_data = cape.isel(step=idx)
-        cape_data = cape_data.sel(
-            longitude=slice(12, 19),
-            latitude=slice(48.3, 51.2)
-        )
+        cape_data = cape_data.where(mask)
 
         cape_plot = cape_data[::2, ::2]
 
