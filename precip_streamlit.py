@@ -1395,7 +1395,15 @@ if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
         shear = shear.where(mask)
 
         del u_sfc, v_sfc, du, dv
-        gc.collect()
+
+        den_end = pd.Timestamp(t, tz="UTC").tz_convert("Europe/Prague")
+        day_name_end = czech_days_normal[den_end.weekday()]
+
+        st.markdown(
+            f"<div style='font-weight:500; margin-bottom:2px;'>"
+            f"Wind shear 0–6 km + CAPE - {day_name_end} {format_time_Prague(t)} hod ▼</div>",
+            unsafe_allow_html=True
+        )
 
 
         fig = plt.figure(figsize=(10,6))
