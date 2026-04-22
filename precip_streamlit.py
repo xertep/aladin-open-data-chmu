@@ -1502,10 +1502,14 @@ if layer == "Zmax" and "zmax_path" in st.session_state:
 
         data = zmax.isel(step=idx)
 
-        data = data.sel(
-            longitude=slice(12, 19),
-            latitude=slice(48.3, 51.2)
+        mask = (
+            (data.longitude >= 12) &
+            (data.longitude <= 19) &
+            (data.latitude >= 48.3) &
+            (data.latitude <= 51.2)
         )
+
+        data = data.where(mask)
 
 
         den_end = pd.Timestamp(t, tz="UTC").tz_convert("Europe/Prague")
