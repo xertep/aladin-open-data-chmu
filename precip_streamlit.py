@@ -186,6 +186,8 @@ shear_u500_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambe
 
 shear_v500_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambert_2.3km/{run}/ALADLAMB4opendata_{date}{run}_P50000WIND_V_COM.grb.bz2"
 
+shear_cape_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambert_2.3km/{run}/ALADLAMB4opendata_{date}{run}_SURFCAPE_POS_F00.grb.bz2"
+
 
 def safe_load(url, label="Data"):
     with st.spinner(f"Načítám vrstvu: {label}..."):
@@ -308,15 +310,17 @@ czech_days_normal = [
     ]
 
 
-def shear_color(val):
-    if val < 10:
-        return "blue"
-    elif val < 15:
-        return "green"
-    elif val < 20:
-        return "orange"
-    else:
-        return "red"
+shear_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "shear",
+    [
+        (0.00, "blue"),
+        (0.50, "green"),
+        (0.75, "orange"),
+        (1.00, "red")
+    ]
+)
+
+shear_norm = mcolors.Normalize(vmin=0, vmax=25)
 
 
 @st.cache_data(show_spinner=False)
@@ -410,7 +414,7 @@ if st.button("Načíst data"):
         st.session_state["shear_surface_dir_path"] = safe_load(shear_surface_dir_url, "Wind shear")
         st.session_state["shear_u500_path"] = safe_load(shear_u500_url, "Wind shear")
         st.session_state["shear_v500_path"] = safe_load(shear_v500_url, "Wind shear")
-        
+        st.session_state["shear_cape_path"] = safe_load(shear_cape_url, "Wind shear")
 
 if layer == "Srážky" and "precip_path" in st.session_state:
     path = st.session_state["precip_path"]
@@ -1347,6 +1351,9 @@ if layer == "CAPE" and "cape_path" in st.session_state:
 
 if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
 
+    ds_cape = safe_open_grib(st.session_state["shear_cape_path"])
+    cape = ds_cape[list(ds_cape.data_vars)[0]]
+
     ds_ws = safe_open_grib(st.session_state["shear_surface_speed_path"])
     ds_wd = safe_open_grib(st.session_state["shear_surface_dir_path"])
     ds_u500 = safe_open_grib(st.session_state["shear_u500_path"])
@@ -1385,12 +1392,27 @@ if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
         del u_sfc, v_sfc, du, dv
         gc.collect()
 
+
         fig = plt.figure(figsize=(10,6))
         ax = plt.axes(projection=ccrs.Mercator())
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
         plot_data = shear[::10, ::10]
-        st.write(plot_data.coords)
+
+        cape_data = cape.isel(step=idx)
+        cape_data = cape_data.where(mask)
+
+        cape_plot = cape_data[::2, ::2]
+
+        cape_plot.plot(
+            ax=ax,
+            transform=ccrs.PlateCarree(),
+            cmap=cape_cmap,
+            norm=cape_norm,
+            add_colorbar=True,
+            add_labels=False,
+            cbar_kwargs={"label": "CAPE (J/kg)"}
+        )
 
         for i in range(plot_data.shape[0]):
             for j in range(plot_data.shape[1]):
@@ -1403,8 +1425,9 @@ if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
                     plot_data.longitude.values[i, j],
                     plot_data.latitude.values[i, j],
                     f"{int(val)}",
-                    color=shear_color(val),
+                    color=shear_cmap(shear_norm(val)),
                     fontsize=8,
+                    fontweight="bold",
                     ha="center",
                     va="center",
                     transform=ccrs.PlateCarree()
