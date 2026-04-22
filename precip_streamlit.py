@@ -1368,6 +1368,11 @@ if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
 
     for idx, t in enumerate(all_times):
 
+        diff_hours = (t - pd.to_datetime(ds_ws.time.values)).total_seconds() / 3600
+
+        if diff_hours % 3 != 0:
+            continue
+
         sfc_speed = ws.isel(step=idx)
         sfc_dir = wd.isel(step=idx)
 
