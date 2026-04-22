@@ -314,13 +314,14 @@ shear_cmap = mcolors.LinearSegmentedColormap.from_list(
     "shear",
     [
         (0.00, "blue"),
-        (0.50, "green"),
-        (0.75, "orange"),
-        (1.00, "red")
+        (0.33, "green"),
+        (0.50, "orange"),
+        (0.66, "red"),
+        (1.00, "#ff00a1")
     ]
 )
 
-shear_norm = mcolors.Normalize(vmin=0, vmax=25)
+shear_norm = mcolors.Normalize(vmin=0, vmax=30)
 
 
 @st.cache_data(show_spinner=False)
