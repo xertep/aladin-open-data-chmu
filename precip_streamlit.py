@@ -1373,11 +1373,23 @@ if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
 
         shear = np.sqrt(du**2 + dv**2)
 
+        mask = (
+            (shear.longitude >= 12) &
+            (shear.longitude <= 19) &
+            (shear.latitude >= 48.3) &
+            (shear.latitude <= 51.2)
+        )
+
+        shear = shear.where(mask)
+
+        del u_sfc, v_sfc, du, dv
+        gc.collect()
+
         fig = plt.figure(figsize=(10,6))
         ax = plt.axes(projection=ccrs.Mercator())
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
-        plot_data = shear[::20, ::20]
+        plot_data = shear[::10, ::10]
         st.write(plot_data.coords)
 
         for i in range(plot_data.shape[0]):
