@@ -131,7 +131,8 @@ layer = st.segmented_control(
         "Vítr",
         "Oblačnost",
         "Sluneční svit",
-        "CAPE"
+        "CAPE",
+        "Wind shear"
     ],
     selection_mode="single"
 )
@@ -175,6 +176,16 @@ ptype_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{ru
 sunshine_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SUNSHINE_DUR.grb.bz2"
 
 cape_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/CZ_1km/{run}/ALADCZ1K4opendata_{date}{run}_SURFCAPE_POS_F00.grb.bz2"
+
+
+shear_surface_speed_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambert_2.3km/{run}/ALADLAMB4opendata_{date}{run}_CLSWIND_SPEED.grb.bz2"
+
+shear_surface_dir_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambert_2.3km/{run}/ALADLAMB4opendata_{date}{run}_CLSWIND_DIREC.grb.bz2"
+
+shear_u500_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambert_2.3km/{run}/ALADLAMB4opendata_{date}{run}_P50000WIND_U_COM.grb.bz2"
+
+shear_v500_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambert_2.3km/{run}/ALADLAMB4opendata_{date}{run}_P50000WIND_V_COM.grb.bz2"
+
 
 def safe_load(url, label="Data"):
     with st.spinner(f"Načítám vrstvu: {label}..."):
@@ -297,6 +308,17 @@ czech_days_normal = [
     ]
 
 
+def shear_color(val):
+    if val < 10:
+        return "blue"
+    elif val < 15:
+        return "green"
+    elif val < 20:
+        return "orange"
+    else:
+        return "red"
+
+
 @st.cache_data(show_spinner=False)
 def load_kraje():
     gdf = gpd.read_file("kraje_wgs84.geojson")
@@ -382,6 +404,12 @@ if st.button("Načíst data"):
 
     elif layer == "CAPE":
         st.session_state["cape_path"] = safe_load(cape_url, "CAPE")
+
+    elif layer == "Wind shear":
+        st.session_state["shear_surface_speed_path"] = safe_load(shear_surface_speed_url, "Wind shear")
+        st.session_state["shear_surface_dir_path"] = safe_load(shear_surface_dir_url, "Wind shear")
+        st.session_state["shear_u500_path"] = safe_load(shear_u500_url, "Wind shear")
+        st.session_state["shear_v500_path"] = safe_load(shear_v500_url, "Wind shear")
         
 
 if layer == "Srážky" and "precip_path" in st.session_state:
@@ -1316,3 +1344,68 @@ if layer == "CAPE" and "cape_path" in st.session_state:
         plt.close(fig)
 
 
+
+if layer == "Wind shear" and "shear_surface_speed_path" in st.session_state:
+
+    ds_ws = safe_open_grib(st.session_state["wind_speed_path"])
+    ds_wd = safe_open_grib(st.session_state["wind_dir_path"])
+    ds_u500 = safe_open_grib(st.session_state["shear_u_path"])
+    ds_v500 = safe_open_grib(st.session_state["shear_v_path"])
+
+    ws = ds_ws[list(ds_ws.data_vars)[0]]
+    wd = ds_wd[list(ds_wd.data_vars)[0]]
+    u500 = ds_u500[list(ds_u500.data_vars)[0]]
+    v500 = ds_v500[list(ds_v500.data_vars)[0]]
+
+    all_times = pd.to_datetime(ws.valid_time.values)
+
+    for idx, t in enumerate(all_times):
+
+        sfc_speed = ws.isel(step=idx)
+        sfc_dir = wd.isel(step=idx)
+
+        rad = np.deg2rad(sfc_dir)
+        u_sfc = -sfc_speed * np.sin(rad)
+        v_sfc = -sfc_speed * np.cos(rad)
+
+        du = u500.isel(step=idx) - u_sfc
+        dv = v500.isel(step=idx) - v_sfc
+
+        shear = np.sqrt(du**2 + dv**2)
+
+        fig = plt.figure(figsize=(10,6))
+        ax = plt.axes(projection=ccrs.Mercator())
+        ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
+
+        plot_data = shear[::12, ::12]
+
+        for i in range(plot_data.shape[0]):
+            for j in range(plot_data.shape[1]:
+                val = plot_data.values[i, j]
+
+                if np.isnan(val):
+                    continue
+
+                ax.text(
+                    plot_data.longitude.values[j],
+                    plot_data.latitude.values[i],
+                    f"{int(val)}",
+                    color=shear_color(val),
+                    fontsize=8,
+                    ha="center",
+                    va="center",
+                    transform=ccrs.PlateCarree()
+                )
+
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2)
+        ax.add_geometries(
+            kraje,
+            crs=ccrs.PlateCarree(),
+            edgecolor="magenta",
+            facecolor="none",
+            linewidth=1.2
+        )
+
+        ax.set_axis_off()
+        st.pyplot(fig)
+        plt.close(fig)
