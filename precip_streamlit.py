@@ -188,6 +188,8 @@ shear_v500_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambe
 
 shear_cape_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambert_2.3km/{run}/ALADLAMB4opendata_{date}{run}_SURFCAPE_POS_F00.grb.bz2"
 
+zmax_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambert_2.3km/{run}/ALADLAMB4opendata_{date}{run}_MAXSIM_REFLECTI.grb.bz2"
+
 
 def safe_load(url, label="Data"):
     with st.spinner(f"Načítám vrstvu: {label}..."):
@@ -324,6 +326,22 @@ shear_cmap = mcolors.LinearSegmentedColormap.from_list(
 shear_norm = mcolors.Normalize(vmin=0, vmax=30)
 
 
+zmax_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "radar_reflectivity",
+    [
+        "#e6e6e6",  # very weak
+        "#a6f28f",  # light green
+        "#3bd14a",  # green
+        "#ffff4d",  # yellow
+        "#ffb84d",  # orange
+        "#ff4d4d",  # red
+        "#b30059",  # deep red/purple (storms)
+    ]
+)
+
+zmax_norm = mcolors.Normalize(vmin=0, vmax=60)
+
+
 @st.cache_data(show_spinner=False)
 def load_kraje():
     gdf = gpd.read_file("kraje_wgs84.geojson")
@@ -416,6 +434,9 @@ if st.button("Načíst data"):
         st.session_state["shear_u500_path"] = safe_load(shear_u500_url, "Wind shear")
         st.session_state["shear_v500_path"] = safe_load(shear_v500_url, "Wind shear")
         st.session_state["shear_cape_path"] = safe_load(shear_cape_url, "Wind shear")
+
+    elif layer == "Zmax":
+        st.session_state["zmax_path"] = safe_load(zmax_url, "Zmax (reflectivity)")
 
 if layer == "Srážky" and "precip_path" in st.session_state:
     path = st.session_state["precip_path"]
@@ -1462,3 +1483,69 @@ if layer == "Střih větru" and "shear_surface_speed_path" in st.session_state:
         ax.set_axis_off()
         st.pyplot(fig)
         plt.close(fig)
+
+
+if layer == "Zmax" and "zmax_path" in st.session_state:
+    
+    ds_zmax = safe_open_grib(st.session_state["zmax_path"])
+    zmax = ds_zmax[list(ds_zmax.data_vars)[0]]
+
+    all_times = pd.to_datetime(zmax.valid_time.values)
+    run_time = pd.to_datetime(ds_zmax.time.values)
+
+    for idx, t in enumerate(all_times):
+
+        diff_hours = (t - run_time).total_seconds() / 3600
+        if diff_hours % 3 != 0:
+            continue
+
+        data = zmax.isel(step=idx)
+
+        data = data.sel(
+            longitude=slice(12, 19),
+            latitude=slice(48.3, 51.2)
+        )
+
+
+        den_end = pd.Timestamp(t, tz="UTC").tz_convert("Europe/Prague")
+        day_name_end = czech_days_normal[den_end.weekday()]
+
+        st.markdown(
+            f"<div style='font-weight:500; margin-bottom:2px;'>"
+            f"Max reflectivity (radar proxy) - {day_name_end} {format_time_Prague(t)} hod ▼</div>",
+            unsafe_allow_html=True
+        )
+
+        fig = plt.figure(figsize=(10, 6))
+        ax = plt.axes(projection=ccrs.Mercator())
+        ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
+
+        plot_data = data[::3, ::3]
+
+        plot_data.plot(
+            ax=ax,
+            transform=ccrs.PlateCarree(),
+            cmap=zmax_cmap,
+            norm=zmax_norm,
+            add_colorbar=True,
+            add_labels=False,
+            cbar_kwargs={"label": "Max reflectivity (dBZ)"},
+            zorder=1
+        )
+
+        ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2.0)
+        ax.add_feature(cfeature.COASTLINE, edgecolor="magenta", linewidth=2.0)
+        ax.add_geometries(
+            kraje,
+            crs=ccrs.PlateCarree(),
+            edgecolor="magenta",
+            facecolor="none",
+            linewidth=1.2
+        )
+
+        ax.set_axis_off()
+        st.pyplot(fig)
+        plt.close(fig)
+
+
+        
