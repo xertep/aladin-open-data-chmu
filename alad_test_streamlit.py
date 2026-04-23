@@ -450,7 +450,7 @@ if st.button("Načíst data"):
 
     elif layer == "CAPE":
         st.session_state["shear_cape_path"] = safe_load(shear_cape_url, "CAPE")
-        st.session_state["cin_path"] = safe_load(cin_url, "CIN")
+        st.session_state["cin_path"] = safe_load(cin_url, "CAPE")
 
     elif layer == "Střih větru":
         st.session_state["shear_surface_speed_path"] = safe_load(shear_surface_speed_url, "Wind shear")
@@ -1326,7 +1326,7 @@ if layer == "Sluneční svit" and "sunshine_path" in st.session_state:
 
 
 # ---- CAPE ----
-if layer == "CAPE" and "cape_path" in st.session_state:
+if layer == "CAPE" and "shear_cape_path" in st.session_state:
 
     ds_cape = safe_open_grib(st.session_state["shear_cape_path"])
     cape = ds_cape[list(ds_cape.data_vars)[0]]
