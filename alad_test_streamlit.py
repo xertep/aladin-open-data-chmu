@@ -191,6 +191,7 @@ shear_cape_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambe
 
 zmax_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambert_2.3km/{run}/ALADLAMB4opendata_{date}{run}_MAXSIM_REFLECTI.grb.bz2"
 
+cin_url = f"https://opendata.chmi.cz/meteorology/weather/nwp_aladin/Lambert_2.3km/{run}/ALADLAMB4opendata_{date}{run}_SURFCIEN_POS_F00.grb.bz2"
 
 def safe_load(url, label="Data"):
     with st.spinner(f"Načítám vrstvu: {label}..."):
@@ -448,7 +449,8 @@ if st.button("Načíst data"):
         st.session_state["sunshine_path"] = safe_load(sunshine_url, "Sluneční svit")
 
     elif layer == "CAPE":
-        st.session_state["cape_path"] = safe_load(cape_url, "CAPE")
+        st.session_state["shear_cape_path"] = safe_load(shear_cape_url, "CAPE")
+        st.session_state["cin_path"] = safe_load(cin_url, "CIN")
 
     elif layer == "Střih větru":
         st.session_state["shear_surface_speed_path"] = safe_load(shear_surface_speed_url, "Wind shear")
@@ -1326,8 +1328,11 @@ if layer == "Sluneční svit" and "sunshine_path" in st.session_state:
 # ---- CAPE ----
 if layer == "CAPE" and "cape_path" in st.session_state:
 
-    ds_cape = safe_open_grib(st.session_state["cape_path"])
+    ds_cape = safe_open_grib(st.session_state["shear_cape_path"])
     cape = ds_cape[list(ds_cape.data_vars)[0]]
+
+    ds_cin = safe_open_grib(st.session_state["cin_path"])
+    cin = ds_cin[list(ds_cin.data_vars)[0]]
 
     all_times = pd.to_datetime(cape.valid_time.values)
     run_time = pd.to_datetime(ds_cape.time.values)
@@ -1339,8 +1344,10 @@ if layer == "CAPE" and "cape_path" in st.session_state:
         if diff_hours % 3 != 0:
             continue
 
-        data = cape.isel(step=idx)
-        data = data.where(data >= 1)
+        cape_data = crop_czech_domain(cape.isel(step=idx))
+
+        cin_data = crop_czech_domain(cin.isel(step=idx))
+        cin_mask = cin_data >= 50
 
         # st.markdown(f"#### CAPE – {t:%d.%m.%y %H:%M} UTC ▼")
 
@@ -1353,25 +1360,36 @@ if layer == "CAPE" and "cape_path" in st.session_state:
                 unsafe_allow_html=True
             )
 
-        data_small = data[::2, ::2]
+        #data_small = data[::2, ::2]
 
         fig = plt.figure(figsize=(10, 6))
         ax = plt.axes(projection=ccrs.Mercator())
 
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
-        data_small.plot(
+        cape_data.plot(
             ax=ax,
+            x="longitude",
+            y="latitude",
             transform=ccrs.PlateCarree(),
             cmap=cape_cmap,
             norm=cape_norm,
             add_colorbar=True,
             add_labels=False,
-            cbar_kwargs={
-                "label": "CAPE (J/kg)",
-                "ticks": cape_bounds,
-                "extend": "max"
-            }
+            alpha=0.9,
+            zorder=1,
+            cbar_kwargs={"label": "CAPE (J/kg)"}
+        )
+
+        ax.contourf(
+            cin_data.longitude,
+            cin_data.latitude,
+            cin_mask,
+            levels=[0.5, 1],
+            colors="none",
+            hatches=["////"],
+            transform=ccrs.PlateCarree(),
+            zorder=2
         )
 
         ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2.0)
