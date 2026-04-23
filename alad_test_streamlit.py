@@ -1449,10 +1449,10 @@ if layer == "Střih větru" and "shear_surface_speed_path" in st.session_state:
         ax = plt.axes(projection=ccrs.Mercator())
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
-        plot_data = shear[::6, ::6]
+        plot_data = shear[::12, ::12]
 
 
-        cape_plot = cape_data[::2, ::2]
+        cape_plot = cape_data[::1, ::1]
 
         cape_plot.plot(
             ax=ax,
@@ -1503,6 +1503,14 @@ if layer == "Střih větru" and "shear_surface_speed_path" in st.session_state:
 
 
 if layer == "Zmax" and "zmax_path" in st.session_state:
+
+    def zmax_formatter(x, pos):
+        if x < 1:
+            return f"{x:.2f}"
+        elif x < 10:
+            return f"{x:.1f}"
+        else:
+            return f"{int(round(x))}"
     
     ds_zmax = safe_open_grib(st.session_state["zmax_path"])
     zmax = ds_zmax[list(ds_zmax.data_vars)[0]]
@@ -1550,6 +1558,7 @@ if layer == "Zmax" and "zmax_path" in st.session_state:
             cbar_kwargs={
                 "label": "Max. srážková intenzita (mm/h)",
                 "ticks": zmax_bounds,
+                "format": ticker.FuncFormatter(zmax_formatter),
                 "extend": "max"
             }
         )
