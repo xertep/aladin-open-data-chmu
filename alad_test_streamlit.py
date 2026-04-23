@@ -327,20 +327,33 @@ shear_cmap = mcolors.LinearSegmentedColormap.from_list(
 shear_norm = mcolors.Normalize(vmin=0, vmax=30)
 
 
-zmax_cmap = mcolors.LinearSegmentedColormap.from_list(
-    "radar_reflectivity",
-    [
-        "#e6e6e6",  # very weak
-        "#a6f28f",  # light green
-        "#3bd14a",  # green
-        "#ffff4d",  # yellow
-        "#ffb84d",  # orange
-        "#ff4d4d",  # red
-        "#b30059",  # deep red/purple (storms)
-    ]
-)
+zmax_bounds = [
+    0.06, 0.11, 0.20, 0.36, 0.64,
+    1.14, 2.02, 3.60, 6.40, 11.38,
+    20.24, 36.0, 64.02, 113.8, 202.0
+]
 
-zmax_norm = mcolors.Normalize(vmin=0, vmax=60)
+zmax_colors = [
+    "#d9f0ff",
+    "#b6e3ff",
+    "#8fd0ff",
+    "#66ff66",
+    "#33cc33",
+    "#ffff66",
+    "#ffcc33",
+    "#ff9933",
+    "#ff6600",
+    "#ff3333",
+    "#cc0000",
+    "#b30059",
+    "#800040",
+    "#4d0026"
+]
+
+zmax_cmap = mcolors.ListedColormap(zmax_colors)
+zmax_cmap.set_over("#2b0015")
+
+zmax_norm = mcolors.BoundaryNorm(zmax_bounds, zmax_cmap.N)
 
 
 @st.cache_data(show_spinner=False)
@@ -1503,10 +1516,10 @@ if layer == "Zmax" and "zmax_path" in st.session_state:
             continue
 
         data = zmax.isel(step=idx)
-        st.write(data.dims)
 
         data = crop_czech_domain(data)
 
+        plot_data = data.where(data >= 0.06)
         plot_data = data[::2, ::2]
 
 
@@ -1531,8 +1544,11 @@ if layer == "Zmax" and "zmax_path" in st.session_state:
             norm=zmax_norm,
             add_colorbar=True,
             add_labels=False,
-            cbar_kwargs={"label": "Max reflectivity (dBZ)"},
-            zorder=1
+            cbar_kwargs={
+                "label": "Max. srážková intenzita (mm/h)",
+                "ticks": zmax_bounds,
+                "extend": "max"
+            }
         )
 
         ax.add_feature(cfeature.BORDERS, edgecolor="magenta", linewidth=2.0)
