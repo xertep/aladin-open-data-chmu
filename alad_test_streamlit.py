@@ -1440,7 +1440,7 @@ if layer == "Střih větru" and "shear_surface_speed_path" in st.session_state:
 
         st.markdown(
             f"<div style='font-weight:500; margin-bottom:2px;'>"
-            f"Wind shear 0–6 km + CAPE - {day_name_end} {format_time_Prague(t)} hod ▼</div>",
+            f"Střih větru 0–6 km + CAPE - {day_name_end} {format_time_Prague(t)} hod ▼</div>",
             unsafe_allow_html=True
         )
 
