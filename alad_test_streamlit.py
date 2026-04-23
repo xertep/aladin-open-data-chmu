@@ -381,7 +381,6 @@ def crop_czech_domain(data):
         (data.longitude <= 19) &
         (data.latitude >= 48.3) &
         (data.latitude <= 51.2),
-        drop=True
     )
 
 
@@ -1457,6 +1456,8 @@ if layer == "Střih větru" and "shear_surface_speed_path" in st.session_state:
 
         cape_plot.plot(
             ax=ax,
+            x="longitude",
+            y="latitude",
             transform=ccrs.PlateCarree(),
             cmap=cape_cmap,
             norm=cape_norm,
@@ -1520,7 +1521,7 @@ if layer == "Zmax" and "zmax_path" in st.session_state:
         data = crop_czech_domain(data)
 
         plot_data = data.where(data >= 0.06)
-        plot_data = data[::2, ::2]
+        plot_data = plot_data[::2, ::2]
 
 
         den_end = pd.Timestamp(t, tz="UTC").tz_convert("Europe/Prague")
@@ -1539,6 +1540,8 @@ if layer == "Zmax" and "zmax_path" in st.session_state:
 
         plot_data.plot(
             ax=ax,
+            x="longitude",
+            y="latitude",
             transform=ccrs.PlateCarree(),
             cmap=zmax_cmap,
             norm=zmax_norm,
