@@ -1449,7 +1449,7 @@ if layer == "Střih větru" and "shear_surface_speed_path" in st.session_state:
         ax = plt.axes(projection=ccrs.Mercator())
         ax.set_extent([12, 19, 48.3, 51.2], crs=ccrs.PlateCarree())
 
-        plot_data = shear[::12, ::12]
+        plot_data = shear[::9, ::9]
 
 
         cape_plot = cape_data[::1, ::1]
