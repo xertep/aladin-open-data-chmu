@@ -1356,7 +1356,7 @@ if layer == "CAPE" and "shear_cape_path" in st.session_state:
 
         st.markdown(
                 f"<div style='font-weight:500; margin-bottom:2px;'>"
-                f"CAPE (most unstable) - {day_name_end} {format_time_Prague(t)} hod ▼</div>",
+                f"CAPE (most unstable) + CIN - {day_name_end} {format_time_Prague(t)} hod ▼</div>",
                 unsafe_allow_html=True
             )
 
