@@ -334,24 +334,24 @@ zmax_bounds = [
 ]
 
 zmax_colors = [
-    "#d9f0ff",
-    "#b6e3ff",
-    "#8fd0ff",
-    "#66ff66",
-    "#33cc33",
-    "#ffff66",
-    "#ffcc33",
-    "#ff9933",
-    "#ff6600",
-    "#ff3333",
-    "#cc0000",
-    "#b30059",
-    "#800040",
-    "#4d0026"
+    "#380070",
+    "#380070",
+    "#0000fc",
+    "#006cc0",
+    "#00a000",
+    "#00bc00",
+    "#34d800",
+    "#9cdc00",
+    "#e0dc00",
+    "#fcb000",
+    "#fc8400",
+    "#fc5800",
+    "#fc0000",
+    "#fc0000"
 ]
 
 zmax_cmap = mcolors.ListedColormap(zmax_colors)
-zmax_cmap.set_over("#2b0015")
+zmax_cmap.set_over("#ffffff")
 
 zmax_norm = mcolors.BoundaryNorm(zmax_bounds, zmax_cmap.N)
 
@@ -1452,7 +1452,7 @@ if layer == "Střih větru" and "shear_surface_speed_path" in st.session_state:
         plot_data = shear[::6, ::6]
 
 
-        cape_plot = cape_data[::3, ::3]
+        cape_plot = cape_data[::2, ::2]
 
         cape_plot.plot(
             ax=ax,
@@ -1521,7 +1521,7 @@ if layer == "Zmax" and "zmax_path" in st.session_state:
         data = crop_czech_domain(data)
 
         plot_data = data.where(data >= 0.06)
-        plot_data = plot_data[::2, ::2]
+        #plot_data = plot_data[::2, ::2]
 
 
         den_end = pd.Timestamp(t, tz="UTC").tz_convert("Europe/Prague")
