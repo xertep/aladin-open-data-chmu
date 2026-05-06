@@ -1347,7 +1347,7 @@ if layer == "CAPE" and "shear_cape_path" in st.session_state:
         cape_data = crop_czech_domain(cape.isel(step=idx))
 
         cin_data = crop_czech_domain(cin.isel(step=idx))
-        cin_mask = cin_data >= 50
+        cin_mask = cin_data <= -50
 
         # st.markdown(f"#### CAPE – {t:%d.%m.%y %H:%M} UTC ▼")
 
@@ -1555,7 +1555,7 @@ if layer == "Zmax" and "zmax_path" in st.session_state:
 
         st.markdown(
             f"<div style='font-weight:500; margin-bottom:2px;'>"
-            f"Max reflectivity (radar proxy) - {day_name_end} {format_time_Prague(t)} hod ▼</div>",
+            f"Max reflectivity - {day_name_end} {format_time_Prague(t)} hod ▼</div>",
             unsafe_allow_html=True
         )
 
