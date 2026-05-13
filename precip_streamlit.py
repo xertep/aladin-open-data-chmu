@@ -17,24 +17,60 @@ import re
 import gc
 import geopandas as gpd
 
+st.markdown("""
+<style>
+
+/* Top header */
+[data-testid="stHeader"] {
+    display: none;
+}
+
+/* Main toolbar */
+[data-testid="stToolbar"] {
+    display: none;
+}
+
+/* Bottom decoration / footer */
+[data-testid="stDecoration"] {
+    display: none;
+}
+
+/* Streamlit floating button(s) */
+[data-testid="stStatusWidget"] {
+    display: none;
+}
+
+/* Bottom right profile / deploy button area */
+.stAppDeployButton {
+    display: none;
+}
+
+[class*="viewerBadge"] {
+    display: none !important;
+}
+
+[class*="profileContainer"] {
+    display: none !important;
+}
+
+
+/* Old menu/footer fallback */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+
+/* Remove extra top spacing */
+.block-container {
+    padding-top: 0.01rem;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 st.set_page_config(
     page_title="Aladin (open data ČHMÚ)",  # this changes the browser tab title
     page_icon="🌧️"                     # optional: emoji or path to an image
 )
 
-st.markdown("""
-<style>
-/* Reduce header but keep functionality */
-header {
-    visibility: visible;
-}
-
-/* Remove extra spacing */
-.block-container {
-    padding-top: 2.5rem !important;
-}
-</style>
-""", unsafe_allow_html=True)
 
 
 st.markdown("### Model ALADIN")
